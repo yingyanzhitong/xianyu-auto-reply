@@ -1,0 +1,26 @@
+CHANGELOG.md
+  s_c083fbb70751d4::t_e48595fc201bd4 3-6
+deploy/docker-compose.thread-guard.yml
+  s_c083fbb70751d4::t_e48595fc201bd4 1-4
+websocket/pyproject.toml
+  s_c083fbb70751d4::t_e48595fc201bd4 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "df538f33774256ce4eab93e0853013a17618e49b",
+  "prompts": {},
+  "logical_commit_id": "df538f33774256ce4eab93e0853013a17618e49b",
+  "sessions": {
+    "s_c083fbb70751d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa266-5be8-7152-988a-4fdacfebb336",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 9,
+      "total_deletions": 1
+    }
+  }
+}
