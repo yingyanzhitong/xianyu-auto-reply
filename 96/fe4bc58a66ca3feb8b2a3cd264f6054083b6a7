@@ -1,0 +1,34 @@
+package.json
+  s_bfd82453425369::t_9165cb1a6116ab 3
+CHANGELOG.md
+  s_bfd82453425369::t_9165cb1a6116ab 3-6
+docker/frontend/nginx.conf
+  s_bfd82453425369::t_9165cb1a6116ab 17-23
+deploy/docker-compose.gamer520-v0.2.2.yml
+  s_bfd82453425369::t_4bda7f48557693 9
+frontend/package.json
+  s_bfd82453425369::t_9165cb1a6116ab 4
+frontend/package-lock.json
+  s_bfd82453425369::t_11ae1401199a7c 3,9
+package-lock.json
+  s_bfd82453425369::t_43a46db78829c7 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "96fe4bc58a66ca3feb8b2a3cd264f6054083b6a7",
+  "prompts": {},
+  "logical_commit_id": "96fe4bc58a66ca3feb8b2a3cd264f6054083b6a7",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 23,
+      "total_deletions": 12
+    }
+  }
+}
