@@ -1,0 +1,74 @@
+backend-web/app/core/config.py
+  s_bfd82453425369::t_a3958e7659a9c1 33
+backend-web/app/api/routes/cookies.py
+  s_bfd82453425369::t_1bbb051eed2f6e 427-437
+backend-web/app/services/account_service.py
+  s_bfd82453425369::t_1bbb051eed2f6e 21,33-52,54-61,67-79,390-394,405,414-419,421,532-537,546,563,610-615,628,645
+  s_bfd82453425369::t_498de3f23359c6 53,62-66
+common/utils/security.py
+  s_bfd82453425369::t_b60bcd992aa1b1 11,60-98
+frontend/src/pages/admin/UserApiKeyModal.tsx
+  s_bfd82453425369::t_23bed59047d216 1,4,23,25-27,33-60,62,75,80,112,147-164,176,179,185
+  s_bfd82453425369::t_5839553c28c446 61
+backend-web/app/api/routes/admin.py
+  s_bfd82453425369::t_5839553c28c446 7,236,241-242,264-265
+  s_bfd82453425369::t_b60bcd992aa1b1 42-48,130,206,214-217,224,229-235,237-240,243-263,266-282,285-286,301
+frontend/package.json
+  s_bfd82453425369::t_a3958e7659a9c1 4
+backend-web/app/api/routes/items.py
+  s_bfd82453425369::t_a91e68752c86a8 111,125-135,138,212-215
+common/models/user.py
+  s_bfd82453425369::t_b60bcd992aa1b1 15,68
+common/db/init_database.py
+  s_bfd82453425369::t_b60bcd992aa1b1 374,1874-1875
+  s_bfd82453425369::t_498de3f23359c6 447,3380-3415
+frontend/src/pages/items/Items.tsx
+  s_bfd82453425369::t_a73dad8b129616 36,126-127,131,135,137-139,153,156-159,276-277
+frontend/src/api/admin.ts
+  s_bfd82453425369::t_a73dad8b129616 25,67,111-122
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_01012253bc3516 23,27-34,104-154,165-176,204-240
+  s_bfd82453425369::t_5865c771692bed 8,13,177-203
+backend-web/pyproject.toml
+  s_bfd82453425369::t_a3958e7659a9c1 3
+frontend/src/types/index.ts
+  s_bfd82453425369::t_a73dad8b129616 19
+common/services/item_service.py
+  s_bfd82453425369::t_1bbb051eed2f6e 36,41-48,70-74,289,394
+  s_bfd82453425369::t_498de3f23359c6 51,60-64,67
+  s_bfd82453425369::t_5839553c28c446 52-59,65-66,68,255-261
+  s_bfd82453425369::t_a91e68752c86a8 118-123,130-131,134-140,145-147,162,189-195,201-203,254
+  s_bfd82453425369::t_a373519bcf6f45 50
+package.json
+  s_bfd82453425369::t_a3958e7659a9c1 3
+common/models/xy_account.py
+  s_bfd82453425369::t_498de3f23359c6 28-29
+  s_bfd82453425369::t_c880770acb17cc 37
+deploy/docker-compose.gamer520-v0.2.2.yml
+  s_bfd82453425369::t_a3958e7659a9c1 3,6,9
+CHANGELOG.md
+  s_bfd82453425369::t_a3958e7659a9c1 3-8
+frontend/package-lock.json
+  s_bfd82453425369::t_f5b1791e02c857 3,9
+package-lock.json
+  s_bfd82453425369::t_b8f80101f287b7 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "6b75b08f772428fcce3be91e122cb22a8df19fd2",
+  "prompts": {},
+  "logical_commit_id": "6b75b08f772428fcce3be91e122cb22a8df19fd2",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 589,
+      "total_deletions": 81
+    }
+  }
+}
