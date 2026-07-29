@@ -1,0 +1,112 @@
+frontend/package.json
+  s_bfd82453425369::t_d6b2a3ef7c66d2 4
+CHANGELOG.md
+  s_bfd82453425369::t_d6b2a3ef7c66d2 1-53
+backend-web/pyproject.toml
+  s_bfd82453425369::t_d6b2a3ef7c66d2 3
+websocket/pyproject.toml
+  s_bfd82453425369::t_d6b2a3ef7c66d2 3
+backend-web/app/core/config.py
+  s_bfd82453425369::t_d6b2a3ef7c66d2 33
+package.json
+  s_bfd82453425369::t_d6b2a3ef7c66d2 2-4
+README.md
+  s_bfd82453425369::t_3a1a26d99729a3 382-431
+backend-web/app/api/deps.py
+  s_bfd82453425369::t_4f9252442748c0 13,15,25-26,30,40-41,44,50-79
+backend-web/app/api/routes/admin.py
+  s_bfd82453425369::t_d95f488465f922 7,42-48,128-132,197-305
+backend-web/app/api/routes/cards.py
+  s_bfd82453425369::t_d0a7d13007f456 7,106,419-423
+backend-web/app/api/routes/cookies.py
+  s_bfd82453425369::t_ae483499a2bce9 427-437
+backend-web/app/api/routes/items.py
+  s_bfd82453425369::t_9e1e2cee6106bb 111,125-135,138,212-215
+backend-web/app/api/routes/product_publish.py
+  s_bfd82453425369::t_94fff1561a36f2 13-14,18-21,94,97-133,146-165,312-354,357-360,362-393,397,405,412,415-416,427-429,432-439,441,447-448,450-451,453,460,467-480,484,488-512,514-516,521-535,547-549,551,679,681,687-695,697,703-713,716-726
+backend-web/app/services/account_service.py
+  s_bfd82453425369::t_867e94bae95209 21,33-79,390-394,405,414-419,421,532-537,546,563,610-615,628,645
+backend-web/app/services/card_service.py
+  s_bfd82453425369::t_fdc6b3a0970cfa 686,694,700-705
+backend-web/app/services/product_publish_service.py
+  s_bfd82453425369::t_f983cb830f2f55 10,22-36,64-155,301-303
+backend-web/app/services/selectable_item_service.py
+  s_bfd82453425369::t_3b0b1a12b14972 15,48-55,57-66,70
+backend-web/app/services/xianyu_publisher.py
+  s_bfd82453425369::t_814bac5483b769 227-232,245-249
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_7f4760366695d7 1-456
+common/db/compat.py
+  s_bfd82453425369::t_8ac32ecc2c3ba8 37-41,43,94-100,136-137,140-145,149
+common/db/init_database.py
+  s_bfd82453425369::t_b51001f5bbfba5 372-376,447,1067,1267-1269,1274-1275,1277-1299,1872-1882,1903,2905-2922,2940-2957,3380-3415
+common/models/_exports.py
+  s_bfd82453425369::t_7f5b5a4b4c8879 46,114
+common/models/card_item_relation.py
+  s_bfd82453425369::t_0e56cee87ce7a8 36
+common/models/product_material.py
+  s_bfd82453425369::t_201eed08c60ba3 11,23-28,45-47
+common/models/publish_batch.py
+  s_bfd82453425369::t_ddb3e147e3645d 1-32
+common/models/publish_log.py
+  s_bfd82453425369::t_87bd490a52309b 23
+common/models/user.py
+  s_bfd82453425369::t_cdadc6591f57b3 15,66-70
+common/models/xy_account.py
+  s_bfd82453425369::t_221d861fac101e 28-29,37
+common/services/captcha/concurrency.py
+  s_bfd82453425369::t_426b29ebfbe878 520-522,525-532,536,542,551-560,569-586
+common/services/card_delivery_content.py
+  s_bfd82453425369::t_afd9cfa8012945 85,139,172,183
+common/services/card_matcher.py
+  s_bfd82453425369::t_4e054660f8c58b 71,75,337,346,369-386,479,486,489-494
+common/services/item_service.py
+  s_bfd82453425369::t_dc3e23b53f566b 36,41-48,50-68,70-74,118-123,130-131,134-140,145-147,162,189-195,201-203,254-261,289,394
+common/services/publish_image_service.py
+  s_bfd82453425369::t_faeda6a54ee6a1 10-12,15,22-23,50-71,75-111,114
+common/utils/security.py
+  s_bfd82453425369::t_50837eb5507d47 11-12,28,43-98
+docker/frontend/nginx.conf
+  s_bfd82453425369::t_986ab730b69aaf 17-23
+frontend/src/api/admin.ts
+  s_bfd82453425369::t_2c95ef987dd5d4 23-27,65-69,105-132
+frontend/src/pages/admin/UserApiKeyModal.tsx
+  s_bfd82453425369::t_a2bfba45959077 1-208
+frontend/src/pages/admin/Users.tsx
+  s_bfd82453425369::t_bf196a6616ee14 2,10,67,283-290,412-421
+frontend/src/pages/cards/CardFormModal.tsx
+  s_bfd82453425369::t_b5199911bfac34 33
+frontend/src/pages/items/Items.tsx
+  s_bfd82453425369::t_182ac369e95f35 36,126-127,131,135,137-139,153,156-159,276-277
+frontend/src/types/index.ts
+  s_bfd82453425369::t_be8d213c511ece 17-21
+websocket/app/api/routes/internal.py
+  s_bfd82453425369::t_28d9e57a879016 1609-1610
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_bfd82453425369::t_c41fa6f28e166f 1866,2024-2037,2076-2077,2611,2652-2662,2686,2699,2711,2737,2782,2823-2828
+websocket/app/services/xianyu/token_manager.py
+  s_bfd82453425369::t_c3020956c9399b 39-41,138,162-175
+frontend/package-lock.json
+  s_bfd82453425369::t_10a61e9c36c246 3,9
+package-lock.json
+  s_bfd82453425369::t_724c2cf0bac7a4 3,8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "1c49ffe7a3e58e1ca91d61b070e83c7c6b33307c",
+  "prompts": {},
+  "logical_commit_id": "1c49ffe7a3e58e1ca91d61b070e83c7c6b33307c",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 60,
+      "total_deletions": 4
+    }
+  }
+}
