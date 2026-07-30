@@ -1,0 +1,43 @@
+backend-web/pyproject.toml
+  s_bfd82453425369::t_d084cf6f8f6aed 3
+websocket/pyproject.toml
+  s_bfd82453425369::t_d084cf6f8f6aed 3
+scheduler/pyproject.toml
+  s_bfd82453425369::t_d084cf6f8f6aed 3
+package.json
+  s_bfd82453425369::t_d084cf6f8f6aed 3
+.github/workflows/build-deploy.yml
+  s_bfd82453425369::t_923e1441f58145 1-98,109-131,133-134
+  s_bfd82453425369::t_35decbca01e03e 99-108,132
+frontend/package.json
+  s_bfd82453425369::t_d084cf6f8f6aed 4
+deploy/github-actions/docker-compose.github.yml
+  s_bfd82453425369::t_923e1441f58145 1-18
+deploy/github-actions/deploy.sh
+  s_bfd82453425369::t_923e1441f58145 1-87
+CHANGELOG.md
+  s_bfd82453425369::t_d084cf6f8f6aed 3-8
+frontend/package-lock.json
+  s_bfd82453425369::t_4964f650037e90 3,9
+package-lock.json
+  s_bfd82453425369::t_14b0f3df3767a1 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "6aaa9b33067dc91c7157812fc0c367da60a6bf3b",
+  "prompts": {},
+  "logical_commit_id": "6aaa9b33067dc91c7157812fc0c367da60a6bf3b",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 250,
+      "total_deletions": 5
+    }
+  }
+}
