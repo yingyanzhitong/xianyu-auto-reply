@@ -1,0 +1,43 @@
+backend-web/pyproject.toml
+  s_bfd82453425369::t_854e31d5ac18b7 3
+frontend/package.json
+  s_bfd82453425369::t_854e31d5ac18b7 4
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_e7056bf378f0f2 353-355
+  s_bfd82453425369::t_69929375a79d5b 388-398
+  s_bfd82453425369::t_98d933d24c176f 400-422
+  s_bfd82453425369::t_b3c44c5bbee99e 356
+  s_bfd82453425369::t_1933187e20b2a3 387
+  s_bfd82453425369::t_3d79d1eeeb63bc 399
+CHANGELOG.md
+  s_bfd82453425369::t_854e31d5ac18b7 3-7
+package.json
+  s_bfd82453425369::t_854e31d5ac18b7 3
+backend-web/app/services/xianyu_publisher.py
+  s_bfd82453425369::t_e234a29c364d3d 406,422-441,447-452,462,466,468-506
+common/services/card_matcher.py
+  s_bfd82453425369::t_3d57e73f883119 534-535,547,568-570,593,613-615
+frontend/package-lock.json
+  s_bfd82453425369::t_0e572e639af5ee 3,9
+package-lock.json
+  s_bfd82453425369::t_7205d14970b5cd 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "df899e972646ab4d6ff50b7bf65cf183d0ce9bd4",
+  "prompts": {},
+  "logical_commit_id": "df899e972646ab4d6ff50b7bf65cf183d0ce9bd4",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 199,
+      "total_deletions": 101
+    }
+  }
+}
