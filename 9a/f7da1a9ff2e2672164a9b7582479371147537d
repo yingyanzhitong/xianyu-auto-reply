@@ -1,0 +1,55 @@
+frontend/src/pages/product-publish/ProductMaterials.tsx
+  s_bfd82453425369::t_24e54e9a96ba4f 266,276,280,310
+backend-web/pyproject.toml
+  s_bfd82453425369::t_3721298ed06ac2 3
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_8960e2b3c351d3 18-19,26,283-317,339-383
+  s_bfd82453425369::t_43f26a2c7eaf1c 338
+common/db/init_database.py
+  s_bfd82453425369::t_4a06ced5e9dd9d 1258,1881
+frontend/src/api/productPublish.ts
+  s_bfd82453425369::t_d263eb9dcec0ea 23,41,193
+backend-web/app/api/routes/product_publish.py
+  s_bfd82453425369::t_4a06ced5e9dd9d 47,64,82,108,163
+CHANGELOG.md
+  s_bfd82453425369::t_3721298ed06ac2 3-8
+frontend/src/pages/product-publish/MaterialFormModal.tsx
+  s_bfd82453425369::t_2c44b52fe7df29 31,72,116-121
+common/models/product_material.py
+  s_bfd82453425369::t_4a06ced5e9dd9d 11,36
+backend-web/app/services/xianyu_publisher.py
+  s_bfd82453425369::t_400870e61cb073 405-452
+  s_bfd82453425369::t_4a06ced5e9dd9d 366
+  s_bfd82453425369::t_efcea4b3da23eb 404
+backend-web/app/services/product_publish_service.py
+  s_bfd82453425369::t_4a06ced5e9dd9d 50,113,131-135,140-141,300
+frontend/src/pages/product-publish/ProductPublish.tsx
+  s_bfd82453425369::t_8952bf7b5f272c 27,106,150,169,177,258,263-267,424
+frontend/package-lock.json
+  s_bfd82453425369::t_f072e7232aab02 3,9
+frontend/package.json
+  s_bfd82453425369::t_2b95edf03313c1 4
+package-lock.json
+  s_bfd82453425369::t_e09bd026d8610a 3,9
+package.json
+  s_bfd82453425369::t_eafcead27829b3 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9af7da1a9ff2e2672164a9b7582479371147537d",
+  "prompts": {},
+  "logical_commit_id": "9af7da1a9ff2e2672164a9b7582479371147537d",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 207,
+      "total_deletions": 30
+    }
+  }
+}
