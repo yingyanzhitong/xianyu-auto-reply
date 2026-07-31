@@ -1,0 +1,48 @@
+package.json
+  s_bfd82453425369::t_9abdf6bedde7b6 3
+build.sh
+  s_bfd82453425369::t_0a461cefe31ae8 70-79,85,88,91,94-96,119-120
+CHANGELOG.md
+  s_bfd82453425369::t_9abdf6bedde7b6 3-8
+.github/workflows/build-deploy.yml
+  s_bfd82453425369::t_5c50304cd2a636 127-130,132-145
+deploy_remote.sh
+  s_bfd82453425369::t_dc5cbbb1dfa55a 52,65,71,116-117,158,162,176,214,218,263,267
+update.sh
+  s_bfd82453425369::t_c36056f32060df 108,111,124,136,147,162,166,180,222,226,274,278
+  s_bfd82453425369::t_964b3433590d20 338-347,353,356,359,408-409,424-425
+docker-compose.yml
+  s_bfd82453425369::t_aa9663ccf491ca 14,17,30,43,54,74,78,92,137,141,192,196
+deploy.sh
+  s_bfd82453425369::t_f93d758ae59af9 51-59,65,68,71,120-121,136-137
+  s_bfd82453425369::t_aa4ca8e3aca79f 157,160,173,186,197,215,219,233,276,280,329,333
+deploy/github-actions/deploy.sh
+  s_bfd82453425369::t_5c50304cd2a636 17,23-61,76-90
+backend-web/.env.example
+  s_bfd82453425369::t_dc5cbbb1dfa55a 52
+frontend/package.json
+  s_bfd82453425369::t_9abdf6bedde7b6 4
+frontend/package-lock.json
+  s_bfd82453425369::t_fbf9005a0e34d7 3,9
+package-lock.json
+  s_bfd82453425369::t_8042bd8d17bfb9 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "f4a3297d28a6433e418bed03e4e2e9f343879794",
+  "prompts": {},
+  "logical_commit_id": "f4a3297d28a6433e418bed03e4e2e9f343879794",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 183,
+      "total_deletions": 78
+    }
+  }
+}
