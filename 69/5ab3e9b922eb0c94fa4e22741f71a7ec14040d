@@ -1,0 +1,30 @@
+package.json
+  s_bfd82453425369::t_6a7ba8a329fbe6 3
+backend-web/tests/test_order_account_isolation.py
+  s_bfd82453425369::t_2e5d93e74683af 1-27,48,70-107
+  s_bfd82453425369::t_e44b00d38908ef 28-47,49-69
+common/services/order_service.py
+  s_bfd82453425369::t_6eab52ba5ecfa0 26,143-172,950-979,983-988,1028-1029
+  s_bfd82453425369::t_a1213bd56466e6 980-982
+CHANGELOG.md
+  s_bfd82453425369::t_6a7ba8a329fbe6 3-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "695ab3e9b922eb0c94fa4e22741f71a7ec14040d",
+  "prompts": {},
+  "logical_commit_id": "695ab3e9b922eb0c94fa4e22741f71a7ec14040d",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 202,
+      "total_deletions": 20
+    }
+  }
+}
