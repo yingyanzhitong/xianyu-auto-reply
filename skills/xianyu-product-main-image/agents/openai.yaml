@@ -1,0 +1,4 @@
+interface:
+  display_name: "闲鱼商品主图"
+  short_description: "根据软件真实功能生成闲鱼商品主图、卖点文案与价格角标"
+  default_prompt: "Use $xianyu-product-main-image to create a Xianyu listing hero image for this software."
