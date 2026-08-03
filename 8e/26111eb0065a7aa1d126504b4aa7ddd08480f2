@@ -42,6 +42,13 @@ deploy/docker-compose.gamer520-v0.2.1.yml
   s_bfd82453425369::t_a3958e7659a9c1 3,6,9
 CHANGELOG.md
   s_bfd82453425369::t_a3958e7659a9c1 4,23
+  s_bfd82453425369::t_1be46e2869ffd4 3,5-6
+backend-web/pyproject.toml
+  s_bfd82453425369::t_ccd42b356241d8 3
+package.json
+  s_bfd82453425369::t_ccd42b356241d8 3
+frontend/package.json
+  s_bfd82453425369::t_ccd42b356241d8 4
 ---
 {
   "schema_version": "authorship/3.0.0",
