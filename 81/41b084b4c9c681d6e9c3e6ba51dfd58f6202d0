@@ -1,0 +1,31 @@
+CHANGELOG.md
+  s_c083fbb70751d4::t_7417668eb4c8c3 1-7
+common/services/captcha/concurrency.py
+  s_c083fbb70751d4::t_92cf1825bfc14e 571-575
+  s_c083fbb70751d4::t_7417668eb4c8c3 520-532,536,542,551-560,569-570,576-586
+websocket/app/services/xianyu/token_manager.py
+  s_c083fbb70751d4::t_7417668eb4c8c3 39-41,138,165-178
+common/db/compat.py
+  s_c083fbb70751d4::t_7417668eb4c8c3 37-43,94-100,136-137,140-145,149
+websocket/pyproject.toml
+  s_c083fbb70751d4::t_7417668eb4c8c3 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "8141b084b4c9c681d6e9c3e6ba51dfd58f6202d0",
+  "prompts": {},
+  "logical_commit_id": "a6c2550b3411ffe3d54aeaed48fa51c7f666a1f4",
+  "sessions": {
+    "s_c083fbb70751d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa266-5be8-7152-988a-4fdacfebb336",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 90,
+      "total_deletions": 24
+    }
+  }
+}
