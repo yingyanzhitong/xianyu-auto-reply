@@ -86,6 +86,13 @@ class ImSessionManager:
             await self._setup_push_callback_after_connect(account_id, client)
             return client
 
+    async def ensure_connected(self, account_id: str) -> GoofishImClient:
+        """确保指定账号的 IM 长连接可用，断开后按现有建连流程恢复。"""
+        client = self.clients.get(account_id)
+        if client and client.is_connected:
+            return client
+        return await self.get_or_connect(account_id)
+
     async def disconnect(self, account_id: str):
         """
         断开指定账号的IM连接
@@ -127,15 +134,17 @@ class ImSessionManager:
             account_id: 账号ID
             ws: 前端 WebSocket 连接
         """
+        # 前端订阅必须依赖可用的 IM 连接。服务重启或 IM 连接意外断开后，
+        # 不能只保留一个看似正常的前端 WebSocket 而不再接收买家消息。
+        client = await self.ensure_connected(account_id)
+
         if account_id not in self._ws_clients:
             self._ws_clients[account_id] = set()
         self._ws_clients[account_id].add(ws)
         logger.info(f"【{account_id}】前端WebSocket客户端已注册，当前连接数: {len(self._ws_clients[account_id])}")
 
         # 确保 IM 客户端上已挂载推送回调
-        client = self.clients.get(account_id)
-        if client and client.is_connected:
-            self._ensure_push_callback(account_id, client)
+        self._ensure_push_callback(account_id, client)
 
     async def unregister_ws_client(self, account_id: str, ws: WebSocket):
         """
