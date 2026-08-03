@@ -1,0 +1,50 @@
+deploy/docker-compose.gamer520-v0.2.1.yml
+  s_bfd82453425369::t_c1dd63f3a43079 3,6
+backend-web/app/api/routes/cards.py
+  s_bfd82453425369::t_c556abf8aee718 419-423
+  s_bfd82453425369::t_cc4be29dc2c1e0 7,106
+backend-web/app/core/config.py
+  s_bfd82453425369::t_c1dd63f3a43079 33
+common/models/card_item_relation.py
+  s_bfd82453425369::t_cc4be29dc2c1e0 36
+CHANGELOG.md
+  s_bfd82453425369::t_c1dd63f3a43079 3-6
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_a599c449d6504e 13,23,80-95,149-183
+package.json
+  s_bfd82453425369::t_c1dd63f3a43079 3
+common/services/card_matcher.py
+  s_bfd82453425369::t_cc4be29dc2c1e0 336,345,368-385
+backend-web/app/services/card_service.py
+  s_bfd82453425369::t_cc4be29dc2c1e0 686,694,700-705
+backend-web/app/services/selectable_item_service.py
+  s_bfd82453425369::t_25bea99aafa94a 15,48-55,66
+  s_bfd82453425369::t_cc4be29dc2c1e0 57-65,70
+backend-web/pyproject.toml
+  s_bfd82453425369::t_c1dd63f3a43079 3
+common/db/init_database.py
+  s_bfd82453425369::t_cc4be29dc2c1e0 1071,1906
+README.md
+  s_bfd82453425369::t_1c407c593c2272 417-427
+package-lock.json
+  s_bfd82453425369::t_c865daeae944f2 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "df49f044f8156e7b609dd9c5b42a376e6b679482",
+  "prompts": {},
+  "logical_commit_id": "887ef555768e76b65d7e8a989b997f3d15616418",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 138,
+      "total_deletions": 18
+    }
+  }
+}
