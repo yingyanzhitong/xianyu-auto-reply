@@ -256,7 +256,10 @@ class RedFlowerTask:
                     # 更新订单 is_red_flower 字段
                     await session.execute(
                         sql_update(XYOrder)
-                        .where(XYOrder.order_no == order.order_no)
+                        .where(
+                            XYOrder.order_no == order.order_no,
+                            XYOrder.account_id == account_id,
+                        )
                         .values(is_red_flower=True)
                     )
                     await session.commit()
