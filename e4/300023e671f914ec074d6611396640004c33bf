@@ -1,0 +1,28 @@
+websocket/pyproject.toml
+  s_49abcfac670b20::t_e03f0bb0b988de 3
+common/tests/test_auto_reply_websocket_recovery.py
+  s_49abcfac670b20::t_e03f0bb0b988de 1-42
+CHANGELOG.md
+  s_49abcfac670b20::t_e03f0bb0b988de 1-5
+websocket/app/services/xianyu/xianyu_async.py
+  s_49abcfac670b20::t_e03f0bb0b988de 2718-2732
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "e4300023e671f914ec074d6611396640004c33bf",
+  "prompts": {},
+  "logical_commit_id": "e4300023e671f914ec074d6611396640004c33bf",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 63,
+      "total_deletions": 1
+    }
+  }
+}
