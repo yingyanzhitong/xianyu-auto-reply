@@ -1,0 +1,55 @@
+frontend/src/pages/chat-new/ChatNew.tsx
+  s_49abcfac670b20::t_fdf23b2e5d6390 701,717,731,744
+backend-web/app/api/routes/orders.py
+  s_49abcfac670b20::t_ee3e9085ee5811 29,34,39,113,122,130,247,253,275,293-296,378,418,456,494,530,544,555-557,610,648-650
+CHANGELOG.md
+  s_49abcfac670b20::t_073d9b780a7393 3-8
+frontend/src/api/orders.ts
+  s_49abcfac670b20::t_fdf23b2e5d6390 102-103,112-113,117-118,121-122
+package.json
+  s_49abcfac670b20::t_073d9b780a7393 3
+websocket/app/api/routes/internal.py
+  s_49abcfac670b20::t_ee3e9085ee5811 59,1064,1091-1094,1192-1193,1524-1525,1931,1942,1963
+common/services/order_service.py
+  s_49abcfac670b20::t_aea830227ef4c3 25,190-198,323-331
+  s_49abcfac670b20::t_821cdd9d433f52 19,206,213-216,221-224,228-230,257-259,266,269-270,272-274,282,287-290,292-295,301,309-310,319-322,332-333,354-356,358,360-362,367-370,381-383,402-405,413-431,434,482,515-518,532,569-572,586-587,604-607,672-675,717-720,1003-1008,1734-1737,1793-1796,2428-2431
+scheduler/app/services/scheduler/red_flower_task.py
+  s_49abcfac670b20::t_aea830227ef4c3 259-262
+frontend/src/pages/orders/Orders.tsx
+  s_49abcfac670b20::t_fdf23b2e5d6390 101,245,249,264-266,268,844,851-852,860,1198-1199
+frontend/package.json
+  s_49abcfac670b20::t_073d9b780a7393 4
+common/db/compat.py
+  s_49abcfac670b20::t_821cdd9d433f52 668-671,675-676,716-718,730-733,1477-1478,1492-1495
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_49abcfac670b20::t_ee3e9085ee5811 352-354,614-616,840-843,884-887,983,1068,1193,1465,1477,1506,1523,1537,1963,1999,2232,2476,2765
+websocket/app/services/xianyu/xianyu_async.py
+  s_49abcfac670b20::t_ee3e9085ee5811 735,760,825-827,1296-1298,1433-1435,1502-1504
+common/tests/test_order_account_isolation.py
+  s_49abcfac670b20::t_20a291ee2714a5 1-81
+scheduler/app/services/scheduler/redelivery_task.py
+  s_49abcfac670b20::t_a3dadf890ffcf3 131,227,244,249-250,273,332,412-415,441-444,545-556,581-584,666-668,765,773,781
+frontend/package-lock.json
+  s_49abcfac670b20::t_95027604e51de1 3,9
+package-lock.json
+  s_49abcfac670b20::t_cfa33756db6909 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "8e9a6ebead9b48845eebb232ae3ad29e9364d5a1",
+  "prompts": {},
+  "logical_commit_id": "8e9a6ebead9b48845eebb232ae3ad29e9364d5a1",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 392,
+      "total_deletions": 133
+    }
+  }
+}
