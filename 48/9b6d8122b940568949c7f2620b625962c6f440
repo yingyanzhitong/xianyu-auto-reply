@@ -1,0 +1,38 @@
+common/tests/test_auto_reply_websocket_recovery.py
+  s_49abcfac670b20::t_0e3fbdb1a3e76b 1,4,6,12-31,33-38
+frontend/package.json
+  s_49abcfac670b20::t_536f55a5e1b076 4
+package.json
+  s_49abcfac670b20::t_536f55a5e1b076 3
+CHANGELOG.md
+  s_49abcfac670b20::t_536f55a5e1b076 3-7
+backend-web/app/services/chat_new/im_session_manager.py
+  s_49abcfac670b20::t_6ac76a569c3c68 136-138
+frontend/src/pages/chat-new/ChatNew.tsx
+  s_49abcfac670b20::t_6ac76a569c3c68 118,275
+websocket/app/services/xianyu/xianyu_async.py
+  s_49abcfac670b20::t_0e3fbdb1a3e76b 2726-2740
+frontend/package-lock.json
+  s_49abcfac670b20::t_caea14694c3b2c 3,9
+package-lock.json
+  s_49abcfac670b20::t_311f46109cca9e 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "489b6d8122b940568949c7f2620b625962c6f440",
+  "prompts": {},
+  "logical_commit_id": "489b6d8122b940568949c7f2620b625962c6f440",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 69,
+      "total_deletions": 75
+    }
+  }
+}
