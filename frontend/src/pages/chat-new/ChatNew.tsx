@@ -115,7 +115,7 @@ export function ChatNew() {
   const [phraseContent, setPhraseContent] = useState('')
   const [savingPhrase, setSavingPhrase] = useState(false)
 
-  // 管理实时订阅账号；已连接账号在页面刷新后会自动恢复订阅。
+  // 手动管理 WebSocket 连接的账号列表（仅用户显式操作时加入，页面刷新不自动重连）
   const [wsAccountIds, setWsAccountIds] = useState<string[]>([])
 
   // 手机端 Tab 切换（桌面端 md+ 仍为四栏并排，本 state 不影响桌面布局）
@@ -272,25 +272,7 @@ export function ChatNew() {
     }).catch(() => {})
   }, [])
 
-  // 已连接账号在账号列表加载完成后恢复实时订阅。只移除当前列表中明确已断开的账号，
-  // 避免分页列表尚未加载的账号被意外取消订阅。
-  useEffect(() => {
-    const connectedIds = accounts.filter((account) => account.connected).map((account) => account.account_id)
-    const disconnectedIds = new Set(
-      accounts.filter((account) => !account.connected).map((account) => account.account_id),
-    )
-    setWsAccountIds((previous) => {
-      const next = previous.filter((accountId) => !disconnectedIds.has(accountId))
-      for (const accountId of connectedIds) {
-        if (!next.includes(accountId)) next.push(accountId)
-      }
-      return next.length === previous.length && next.every((accountId, index) => accountId === previous[index])
-        ? previous
-        : next
-    })
-  }, [accounts])
-
-  // 为已连接账号建立前端实时消息订阅。
+  // 仅为用户手动操作过的已连接账号建立 WebSocket（页面刷新不自动重连）
   useChatNewWs({
     accountIds: wsAccountIds,
     onNewMessage: handleWsNewMessage,

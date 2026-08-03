@@ -184,13 +184,6 @@ async def _receive_loop(websocket: WebSocket, account_id: str):
             msg_type = msg.get("type", "")
 
             if msg_type == "ping":
-                # 浏览器心跳同时作为 IM 长连接健康检查：若闲鱼侧连接已断开，
-                # 在不影响前端 WebSocket 的前提下按标准流程恢复。
-                manager = get_im_session_manager()
-                try:
-                    await manager.ensure_connected(account_id)
-                except Exception as exc:
-                    logger.warning(f"【{account_id}】心跳检查发现 IM 未恢复: {exc}")
                 await websocket.send_text(
                     json.dumps({"event": "pong"}, ensure_ascii=False)
                 )
