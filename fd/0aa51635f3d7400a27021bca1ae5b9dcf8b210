@@ -1,0 +1,38 @@
+CHANGELOG.md
+  s_bfd82453425369::t_e2731a550fe8c6 3-6
+deploy/docker-compose.gamer520-v0.2.1.yml
+  s_bfd82453425369::t_e2731a550fe8c6 3,6,9
+package.json
+  s_bfd82453425369::t_e2731a550fe8c6 3
+frontend/package.json
+  s_bfd82453425369::t_e2731a550fe8c6 4
+backend-web/app/services/xianyu_publisher.py
+  s_bfd82453425369::t_e2731a550fe8c6 227-232,245-249
+backend-web/pyproject.toml
+  s_bfd82453425369::t_e2731a550fe8c6 3
+backend-web/app/core/config.py
+  s_bfd82453425369::t_e2731a550fe8c6 33
+frontend/package-lock.json
+  s_bfd82453425369::t_e5138a2c4188ea 3,9
+package-lock.json
+  s_bfd82453425369::t_94cd3b5fc9fa73 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "fd0aa51635f3d7400a27021bca1ae5b9dcf8b210",
+  "prompts": {},
+  "logical_commit_id": "8c430a0697e3994ebdc5625f530b5116a5a646b0",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 29,
+      "total_deletions": 16
+    }
+  }
+}
