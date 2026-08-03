@@ -1,0 +1,32 @@
+CHANGELOG.md
+  s_182279acc64b7d::t_8be8d175425848 3-7
+backend-web/pyproject.toml
+  s_182279acc64b7d::t_8be8d175425848 3
+package.json
+  s_182279acc64b7d::t_2ec5dbc6e11c7e 3
+frontend/package.json
+  s_182279acc64b7d::t_2ec5dbc6e11c7e 4
+frontend/package-lock.json
+  s_182279acc64b7d::t_18bc7b9f037024 3,9
+package-lock.json
+  s_182279acc64b7d::t_d97c8057216740 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "f4a4aab14d385d9cf8d794089fe54699f82a443a",
+  "prompts": {},
+  "logical_commit_id": "f4a4aab14d385d9cf8d794089fe54699f82a443a",
+  "sessions": {
+    "s_182279acc64b7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc706-beb6-7652-a5ee-2a16f05cea02",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 8,
+      "total_deletions": 3
+    }
+  }
+}
