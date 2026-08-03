@@ -1,0 +1,36 @@
+skills/xianyu-product-main-image/SKILL.md
+  s_eba32dd9836ee3::t_22300765430318 1-33
+skills/xianyu-product-main-image/agents/openai.yaml
+  s_eba32dd9836ee3::t_22300765430318 1-4
+skills/xianyu-seller-inventory/SKILL.md
+  s_8751222a50cb35::t_f2869a56d22ba8 1-72
+skills/xianyu-seller-inventory/agents/openai.yaml
+  s_8751222a50cb35::t_f2869a56d22ba8 1-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "666f52544612cdb5e0514091c1c7ad0d32c65a5b",
+  "prompts": {},
+  "logical_commit_id": "666f52544612cdb5e0514091c1c7ad0d32c65a5b",
+  "sessions": {
+    "s_8751222a50cb35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc0bf-fc22-7c13-9542-a684a1e416fb",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 76
+    },
+    "s_eba32dd9836ee3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb6e1-1a86-72b0-ac8b-9e3195ebb929",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 37
+    }
+  }
+}
