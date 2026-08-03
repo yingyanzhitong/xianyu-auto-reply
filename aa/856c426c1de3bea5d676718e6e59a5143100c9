@@ -1,0 +1,82 @@
+websocket/app/services/xianyu/xianyu_async.py
+  s_bfd82453425369::t_1750587c016652 735,760,1433-1435
+  s_137e6033604d06::t_8fb399264c5cd9 825-827,1296-1298,1502-1504
+frontend/src/pages/chat-new/ChatNew.tsx
+  s_bfd82453425369::t_9e6a4640611352 701,717,731,744
+package.json
+  s_bfd82453425369::t_9db5de52ef4e89 3
+scheduler/app/services/scheduler/redelivery_task.py
+  s_137e6033604d06::t_de67a135cd7e49 227,244,249-250,273,332,666-668,781
+  s_bfd82453425369::t_1cc7abcd629d48 412-415,441-444,581-584
+  s_137e6033604d06::t_d7045a949be434 131,545-556,765,773
+common/services/order_service.py
+  s_137e6033604d06::t_d000d12b627e73 461,494-497,511,548-551,565-566,583-586
+  s_bfd82453425369::t_0751ae227b03e2 217,651-654,696-699,2414-2417
+  s_137e6033604d06::t_a4a3cf228d43a7 306-309,311-312,333-335,337,339-341,346-349,360-362,381-384
+  s_137e6033604d06::t_3ff4912c04d009 983-991,1716-1719,1775-1782
+  s_bfd82453425369::t_9db5de52ef4e89 19,191,196,204,207-211,215-216
+  s_137e6033604d06::t_d7045a949be434 395-410
+  s_bfd82453425369::t_9e6a4640611352 244-246,249,253,256,259-261,265-271,275,280,283,288,296-297
+  s_137e6033604d06::t_fe338c840da775 392-394
+common/db/compat.py
+  s_137e6033604d06::t_8928d99df61f29 668-671,675-676,1477-1478,1492-1495
+  s_bfd82453425369::t_1750587c016652 716-718,730-733
+common/tests/test_order_account_isolation.py
+  s_bfd82453425369::t_9e6a4640611352 59-76
+  s_137e6033604d06::t_0e81d03f76c173 3-5,39,58
+  s_137e6033604d06::t_1043e06dbab0da 42-49
+  s_137e6033604d06::t_835b593c62ede0 1-2,6-38,40-41,50-57
+backend-web/pyproject.toml
+  s_bfd82453425369::t_9db5de52ef4e89 3
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_137e6033604d06::t_2183e5d0096dee 352-354,614-616,1465,1477,1506,1523,1537,1963
+  s_bfd82453425369::t_65726621efb786 840-843,884-887,983,1068,1193,1999,2232,2476,2765
+backend-web/app/api/routes/orders.py
+  s_bfd82453425369::t_5d29a289d7d658 29,34,39,247,253,275,378,418,456,494
+  s_bfd82453425369::t_9e6a4640611352 113,122,130,293-296
+  s_137e6033604d06::t_721f9d18c52eb7 530,544,555-557,610,648-650
+websocket/app/api/routes/internal.py
+  s_137e6033604d06::t_f0d938040ef259 59,1064,1192-1193,1524-1525,1931,1942,1963
+  s_bfd82453425369::t_b2f7675487f330 1091-1094
+CHANGELOG.md
+  s_bfd82453425369::t_9db5de52ef4e89 3-6
+frontend/src/pages/orders/Orders.tsx
+  s_bfd82453425369::t_5d29a289d7d658 101,245,249,264-266,268,844,851-852,860,1198-1199
+frontend/package.json
+  s_bfd82453425369::t_9db5de52ef4e89 4
+frontend/src/api/orders.ts
+  s_bfd82453425369::t_5d29a289d7d658 102-103,112-113,117-118,121-122
+frontend/package-lock.json
+  s_bfd82453425369::t_19fdca55def323 3,9
+package-lock.json
+  s_bfd82453425369::t_c6c3bfffde3504 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "aa856c426c1de3bea5d676718e6e59a5143100c9",
+  "prompts": {},
+  "logical_commit_id": "aa856c426c1de3bea5d676718e6e59a5143100c9",
+  "sessions": {
+    "s_137e6033604d06": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc5d8-8dd5-7e22-9820-e368e7106fe8",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 284,
+      "total_deletions": 128
+    },
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 157,
+      "total_deletions": 78
+    }
+  }
+}
