@@ -1,0 +1,34 @@
+websocket/app/services/xianyu/xianyu_async.py
+  s_49abcfac670b20::t_8ea8937cab1504 2726-2740
+frontend/package.json
+  s_49abcfac670b20::t_8ea8937cab1504 4
+common/tests/test_auto_reply_websocket_recovery.py
+  s_49abcfac670b20::t_8ea8937cab1504 1-42
+CHANGELOG.md
+  s_49abcfac670b20::t_8ea8937cab1504 3-6
+package.json
+  s_49abcfac670b20::t_8ea8937cab1504 3
+frontend/package-lock.json
+  s_49abcfac670b20::t_b2210dbe912d52 3
+package-lock.json
+  s_49abcfac670b20::t_34dfbbe0c0fa68 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "62f7c57b3449917293e74b9bc24a6951538eac0c",
+  "prompts": {},
+  "logical_commit_id": "62f7c57b3449917293e74b9bc24a6951538eac0c",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 63,
+      "total_deletions": 2
+    }
+  }
+}
