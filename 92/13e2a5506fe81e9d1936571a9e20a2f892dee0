@@ -1,0 +1,51 @@
+websocket/pyproject.toml
+  s_bfd82453425369::t_02bb31c9c1375d 3
+CHANGELOG.md
+  s_bfd82453425369::t_02bb31c9c1375d 3-6
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_3f4da1838d3f57 23,186-208
+  s_bfd82453425369::t_caf783f60aafff 5,209-245
+deploy/docker-compose.gamer520-v0.2.1.yml
+  s_bfd82453425369::t_02bb31c9c1375d 3,6,9-13
+frontend/src/pages/cards/CardFormModal.tsx
+  s_bfd82453425369::t_3f4da1838d3f57 33
+websocket/app/api/routes/internal.py
+  s_bfd82453425369::t_3f4da1838d3f57 1697-1698
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_bfd82453425369::t_3f4da1838d3f57 1866,2024-2037,2076-2077,2611,2652-2662,2699,2711,2737,2782,2823-2828
+common/services/card_matcher.py
+  s_bfd82453425369::t_3f4da1838d3f57 71,75,479,486,489-494
+package.json
+  s_bfd82453425369::t_02bb31c9c1375d 3
+backend-web/pyproject.toml
+  s_bfd82453425369::t_02bb31c9c1375d 3
+frontend/package.json
+  s_bfd82453425369::t_02bb31c9c1375d 4
+common/services/card_delivery_content.py
+  s_bfd82453425369::t_3f4da1838d3f57 85,172,183
+backend-web/app/core/config.py
+  s_bfd82453425369::t_02bb31c9c1375d 33
+frontend/package-lock.json
+  s_bfd82453425369::t_40b3d41fb164ea 3,9
+package-lock.json
+  s_bfd82453425369::t_e3b54ee0f92d34 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "9213e2a5506fe81e9d1936571a9e20a2f892dee0",
+  "prompts": {},
+  "logical_commit_id": "79b5891be3290c810229d6f3bf41660b6a6ba5d0",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 133,
+      "total_deletions": 22
+    }
+  }
+}
