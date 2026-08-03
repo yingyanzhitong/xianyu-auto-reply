@@ -1,0 +1,42 @@
+package.json
+  s_bfd82453425369::t_bbf34ad23dc18b 3
+frontend/package.json
+  s_bfd82453425369::t_bbf34ad23dc18b 4
+backend-web/pyproject.toml
+  s_bfd82453425369::t_bbf34ad23dc18b 3
+CHANGELOG.md
+  s_bfd82453425369::t_bbf34ad23dc18b 3-6
+deploy/github-actions/deploy.sh
+  s_bfd82453425369::t_bbf34ad23dc18b 141
+frontend/package-lock.json
+  s_137e6033604d06::t_0a0b3dfed4043a 3,9
+package-lock.json
+  s_137e6033604d06::t_ab298c738a2413 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "ff2d5ea5dde8952385567b8b12b73cb0dd6ceccb",
+  "prompts": {},
+  "logical_commit_id": "ff2d5ea5dde8952385567b8b12b73cb0dd6ceccb",
+  "sessions": {
+    "s_137e6033604d06": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc5d8-8dd5-7e22-9820-e368e7106fe8",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 8,
+      "total_deletions": 3
+    }
+  }
+}
