@@ -1,0 +1,39 @@
+backend-web/app/api/routes/chat_new_ws.py
+  s_49abcfac670b20::t_11467c88b90333 187-193
+frontend/src/pages/chat-new/ChatNew.tsx
+  s_49abcfac670b20::t_11467c88b90333 118,275-293
+backend-web/app/services/chat_new/im_session_manager.py
+  s_49abcfac670b20::t_11467c88b90333 89-95,137-140,147
+backend-web/tests/test_chat_new_recovery.py
+  s_49abcfac670b20::t_cb597528717e17 1,11-30
+  s_49abcfac670b20::t_11467c88b90333 2-10,31-34
+CHANGELOG.md
+  s_49abcfac670b20::t_d7c2eed10f4a35 3-7
+package.json
+  s_49abcfac670b20::t_d7c2eed10f4a35 3
+frontend/package.json
+  s_49abcfac670b20::t_d7c2eed10f4a35 4
+frontend/package-lock.json
+  s_49abcfac670b20::t_32a31abb4a278c 3,9
+package-lock.json
+  s_49abcfac670b20::t_c6a83882f63810 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "359eaa9c3d75c051008e86ac58d043f02dadc919",
+  "prompts": {},
+  "logical_commit_id": "359eaa9c3d75c051008e86ac58d043f02dadc919",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 164,
+      "total_deletions": 91
+    }
+  }
+}
