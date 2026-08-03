@@ -1,0 +1,42 @@
+websocket/pyproject.toml
+  s_bfd82453425369::t_32e54eb9d1d8bf 3
+CHANGELOG.md
+  s_bfd82453425369::t_32e54eb9d1d8bf 1-5
+frontend/src/pages/cards/CardFormModal.tsx
+  s_bfd82453425369::t_3f4da1838d3f57 33
+websocket/app/api/routes/internal.py
+  s_bfd82453425369::t_3f4da1838d3f57 1697-1698
+frontend/package.json
+  s_bfd82453425369::t_32e54eb9d1d8bf 4
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_bfd82453425369::t_3f4da1838d3f57 1866,2024-2037,2076-2077,2611,2652-2662,2699,2711,2737,2782,2823-2828
+common/services/card_delivery_content.py
+  s_bfd82453425369::t_3f4da1838d3f57 85,172,183
+backend-web/pyproject.toml
+  s_bfd82453425369::t_32e54eb9d1d8bf 3
+backend-web/app/core/config.py
+  s_bfd82453425369::t_32e54eb9d1d8bf 33
+common/services/card_matcher.py
+  s_bfd82453425369::t_3f4da1838d3f57 71,75,459,466,469-474
+frontend/package-lock.json
+  s_bfd82453425369::t_6f393edbad1dae 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "bec4009f7991bab75e3fd2f1df8ef238764e81c9",
+  "prompts": {},
+  "logical_commit_id": "79b5891be3290c810229d6f3bf41660b6a6ba5d0",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": null,
+      "total_additions": 9,
+      "total_deletions": 4
+    }
+  }
+}
