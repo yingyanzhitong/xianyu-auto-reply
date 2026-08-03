@@ -1,0 +1,24 @@
+backend-web/app/services/account_service.py
+  s_182279acc64b7d::t_105c8e4c41b319 681,689-692,698,705,709-712,716
+frontend/src/pages/accounts/Accounts.tsx
+  s_182279acc64b7d::t_105c8e4c41b319 1309,1311,1319-1321,1329,1331,1339-1341,2513,2517,2521,2525,2529,2533
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "b1f645bb719d8ed6e4de70cf7442ea16d32b5466",
+  "prompts": {},
+  "logical_commit_id": "b04b6001bbdc9e3f942b18f86e3bec1dada2547a",
+  "sessions": {
+    "s_182279acc64b7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc706-beb6-7652-a5ee-2a16f05cea02",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 28,
+      "total_deletions": 16
+    }
+  }
+}
