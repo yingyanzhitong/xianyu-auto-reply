@@ -1,0 +1,22 @@
+skills/xianyu-seller-inventory/agents/openai.yaml
+  s_8751222a50cb35::t_5f8fdc1e77e91c 1-4
+skills/xianyu-seller-inventory/SKILL.md
+  s_8751222a50cb35::t_808bfc382bc6aa 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "dec6ec5e19dc81d5d8a3c71a8517dc4ee10ddabf",
+  "prompts": {},
+  "logical_commit_id": "dec6ec5e19dc81d5d8a3c71a8517dc4ee10ddabf",
+  "sessions": {
+    "s_8751222a50cb35": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc0bf-fc22-7c13-9542-a684a1e416fb",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
