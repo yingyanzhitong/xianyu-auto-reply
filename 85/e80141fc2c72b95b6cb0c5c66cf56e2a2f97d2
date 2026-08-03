@@ -1,0 +1,54 @@
+frontend/src/pages/accounts/Accounts.tsx
+  s_182279acc64b7d::t_4ecb566ac59867 4-5,1327-1344,2520-2531
+frontend/package.json
+  s_182279acc64b7d::t_4241715b248b60 4
+frontend/src/types/index.ts
+  s_182279acc64b7d::t_4ecb566ac59867 63
+backend-web/pyproject.toml
+  s_182279acc64b7d::t_4241715b248b60 3
+frontend/src/api/accounts.ts
+  s_182279acc64b7d::t_4ecb566ac59867 73,150,283-287
+backend-web/app/services/account_import_service.py
+  s_182279acc64b7d::t_3bb2684f288d47 287-288
+backend-web/app/services/account_service.py
+  s_182279acc64b7d::t_4ecb566ac59867 696-710
+backend-web/app/api/routes/cookies.py
+  s_182279acc64b7d::t_4ecb566ac59867 26,206,351,842-857
+package.json
+  s_182279acc64b7d::t_4241715b248b60 3
+scheduler/app/services/scheduler/red_flower_task.py
+  s_182279acc64b7d::t_4ecb566ac59867 177,188-189,195-196,200-206,228
+common/db/init_database.py
+  s_182279acc64b7d::t_4ecb566ac59867 1825-1826
+common/models/xy_account.py
+  s_182279acc64b7d::t_4ecb566ac59867 90-94
+common/schemas/account.py
+  s_182279acc64b7d::t_4ecb566ac59867 28,139-145
+backend-web/app/services/account_export_service.py
+  s_182279acc64b7d::t_4ecb566ac59867 239,247-248
+CHANGELOG.md
+  s_182279acc64b7d::t_4241715b248b60 3-6
+frontend/package-lock.json
+  s_182279acc64b7d::t_da79ff85caae9e 3,9
+package-lock.json
+  s_182279acc64b7d::t_439e3514769158 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "85e80141fc2c72b95b6cb0c5c66cf56e2a2f97d2",
+  "prompts": {},
+  "logical_commit_id": "85e80141fc2c72b95b6cb0c5c66cf56e2a2f97d2",
+  "sessions": {
+    "s_182279acc64b7d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc706-beb6-7652-a5ee-2a16f05cea02",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 115,
+      "total_deletions": 16
+    }
+  }
+}
