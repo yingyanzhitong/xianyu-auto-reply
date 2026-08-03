@@ -1,0 +1,28 @@
+CHANGELOG.md
+  s_bfd82453425369::t_e2731a550fe8c6 3-4
+backend-web/app/services/xianyu_publisher.py
+  s_bfd82453425369::t_e2731a550fe8c6 227-232,245-249
+backend-web/pyproject.toml
+  s_bfd82453425369::t_e2731a550fe8c6 3
+backend-web/app/core/config.py
+  s_bfd82453425369::t_e2731a550fe8c6 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "22a3fe032be7675b11613cbc43bd90894fb0a646",
+  "prompts": {},
+  "logical_commit_id": "8c430a0697e3994ebdc5625f530b5116a5a646b0",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 29,
+      "total_deletions": 16
+    }
+  }
+}
