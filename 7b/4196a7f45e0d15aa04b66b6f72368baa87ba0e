@@ -1,0 +1,79 @@
+common/models/_exports.py
+  s_bfd82453425369::t_ce8eee4a0e9f5b 46,114
+backend-web/tests/test_gamer520_external_api.py
+  s_bfd82453425369::t_5e04ac4973d362 1-159
+package-lock.json
+  s_bfd82453425369::t_cb55417cb6a676 3,8-9
+backend-web/app/services/product_publish_service.py
+  s_bfd82453425369::t_a8162a4f81ba45 49-116,261-263
+backend-web/app/api/routes/product_publish.py
+  s_bfd82453425369::t_4d3e235aac81ff 13-14,18-21,94-133,146-165
+  s_bfd82453425369::t_d9f413298e33db 312-354,357-393,397,405,412,415-416
+  s_bfd82453425369::t_8a225fbcae71f0 427-429,432-439,441,447-448,450-451,453,460,467-480,484,488-512,514-516,521-535,547-549,551
+  s_bfd82453425369::t_3379e9165b0052 679,681,687-695,697,703-713,716-726
+frontend/src/pages/admin/Users.tsx
+  s_bfd82453425369::t_037bcc6d144581 2,10,67,283-290,412-421
+common/models/product_material.py
+  s_bfd82453425369::t_ce8eee4a0e9f5b 11,23-28,45-47
+common/models/publish_log.py
+  s_bfd82453425369::t_babe84e883ba3a 23
+frontend/src/types/index.ts
+  s_bfd82453425369::t_037bcc6d144581 17-20
+backend-web/pyproject.toml
+  s_bfd82453425369::t_abb04ade4e2c60 3
+CHANGELOG.md
+  s_bfd82453425369::t_e74d30584eba50 3-10
+backend-web/app/api/routes/admin.py
+  s_bfd82453425369::t_6f2009a33ab9f6 42,122-125,190-239
+frontend/src/pages/admin/UserApiKeyModal.tsx
+  s_bfd82453425369::t_9960399f158df2 25-27,30,41-43,77,107-108,113,117,146,157
+  s_bfd82453425369::t_037bcc6d144581 1-24,28-29,31-40,44-76,78-106,109-112,114-116,118-145,147-156,158-164
+backend-web/app/core/config.py
+  s_bfd82453425369::t_d0839846f53e04 33
+README.md
+  s_bfd82453425369::t_20c1fdb1cc06f7 382-420
+common/db/init_database.py
+  s_bfd82453425369::t_c28272e71cd289 2907-2924,2941-2958
+  s_bfd82453425369::t_ce8eee4a0e9f5b 377-380,1270-1272,1277-1278,1282-1304,1875-1884
+  s_bfd82453425369::t_5a6c3d99ff007b 2906
+common/models/publish_batch.py
+  s_bfd82453425369::t_ce8eee4a0e9f5b 1-32
+frontend/package.json
+  s_bfd82453425369::t_0117943580a594 4
+common/services/publish_image_service.py
+  s_bfd82453425369::t_6163ce9ead8fe9 10-12,15,22-23,50-71,75-111,114
+frontend/package-lock.json
+  s_bfd82453425369::t_76b208820eb9b9 3,9
+common/utils/security.py
+  s_bfd82453425369::t_6f2009a33ab9f6 11,27,42-58
+package.json
+  s_bfd82453425369::t_0732c6d69f1091 2-4
+deploy/docker-compose.gamer520-v0.2.0.yml
+  s_bfd82453425369::t_26d27829e184c4 1-4,7-10
+  s_bfd82453425369::t_d0839846f53e04 5-6
+common/models/user.py
+  s_bfd82453425369::t_6f2009a33ab9f6 66-69
+frontend/src/api/admin.ts
+  s_bfd82453425369::t_037bcc6d144581 23-26,64-67,103-118
+backend-web/app/api/deps.py
+  s_bfd82453425369::t_6f2009a33ab9f6 13,15,25-26,30,40-41,44,50-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "7b4196a7f45e0d15aa04b66b6f72368baa87ba0e",
+  "prompts": {},
+  "logical_commit_id": "3f2d08a01d662b4a1c295aed0d4c4a0133db4427",
+  "sessions": {
+    "s_bfd82453425369": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f85cc-e34a-7ae1-8741-43c8bd58c2d6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null,
+      "total_additions": 3,
+      "total_deletions": 1
+    }
+  }
+}
