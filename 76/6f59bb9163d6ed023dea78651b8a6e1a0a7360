@@ -1,0 +1,62 @@
+frontend/src/pages/orders/Orders.tsx
+  s_137e6033604d06::t_382406ff868ccc 101,245,249,264-266,268,844,851-852,860,1198-1199
+package.json
+  s_137e6033604d06::t_26be12b831d8e6 3
+backend-web/app/api/routes/orders.py
+  s_137e6033604d06::t_9d809574e25192 118,126,248,270,288-289,371,411,449,487,523,537,548,601,639
+websocket/app/services/xianyu/xianyu_async.py
+  s_137e6033604d06::t_cddea2eb2b61b4 735,760,825,1294,1429,1496
+frontend/package.json
+  s_137e6033604d06::t_26be12b831d8e6 4
+frontend/src/api/orders.ts
+  s_137e6033604d06::t_0b3c7c05899433 102-103,112-113,117-118,121-122
+backend-web/pyproject.toml
+  s_137e6033604d06::t_26be12b831d8e6 3
+scheduler/app/services/scheduler/redelivery_task.py
+  s_137e6033604d06::t_b5d86eac27862a 226,243,270,329,409,435,542-544,564,646,743,745-750,757,759-764,771
+  s_137e6033604d06::t_8aa1c886a096d5 545
+  s_137e6033604d06::t_26be12b831d8e6 287
+common/db/compat.py
+  s_137e6033604d06::t_f16e6cb7119e1c 668-669,712,724,1481
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_137e6033604d06::t_544fd37ffce5d4 352,612,836,877,973,1058,1183,1494,1511,1525,1986,2219,2463,2752
+CHANGELOG.md
+  s_137e6033604d06::t_26be12b831d8e6 3-6
+common/services/order_service.py
+  s_137e6033604d06::t_2acebf74512e5d 19,191,203,206-207,211,238,241,245,248,251-253,257,265,268,280-281,290-291,313,315,317,322,333,352,442,492,506,523,588,630,1638,1694,2326
+websocket/app/api/routes/internal.py
+  s_137e6033604d06::t_a92e7a6720febe 1089,1187-1188,1519,1955
+frontend/src/pages/chat-new/ChatNew.tsx
+  s_137e6033604d06::t_1ee08cdaa3b12e 701,717,731,744
+frontend/package-lock.json
+  s_af9be0ec7aca4b::t_9e9b2672110468 3,9
+package-lock.json
+  s_af9be0ec7aca4b::t_98db56918325fc 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "766f59bb9163d6ed023dea78651b8a6e1a0a7360",
+  "prompts": {},
+  "logical_commit_id": "766f59bb9163d6ed023dea78651b8a6e1a0a7360",
+  "sessions": {
+    "s_137e6033604d06": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc5d8-8dd5-7e22-9820-e368e7106fe8",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 141,
+      "total_deletions": 368
+    },
+    "s_af9be0ec7aca4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc694-e1e3-7da1-aa3b-b33756ca21d8",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
