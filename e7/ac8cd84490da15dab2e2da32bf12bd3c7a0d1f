@@ -1,0 +1,47 @@
+backend-web/app/services/account_service.py
+  s_f2d23a444bc84b::t_35c911024476cf 644-654
+frontend/src/api/accounts.ts
+  s_f2d23a444bc84b::t_35c911024476cf 74,151,288-292
+common/tests/test_ai_reply_block_ordered_items.py
+  s_f2d23a444bc84b::t_35c911024476cf 1-55
+frontend/src/pages/accounts/Accounts.tsx
+  s_f2d23a444bc84b::t_35c911024476cf 4-5,1345-1362,2532-2543
+common/models/xy_account.py
+  s_f2d23a444bc84b::t_35c911024476cf 116-121
+CHANGELOG.md
+  s_f2d23a444bc84b::t_f4f060c75b273b 1-5
+common/schemas/account.py
+  s_f2d23a444bc84b::t_35c911024476cf 29,144-148
+frontend/src/types/index.ts
+  s_f2d23a444bc84b::t_35c911024476cf 59
+common/models/xy_order.py
+  s_f2d23a444bc84b::t_35c911024476cf 31
+websocket/app/services/xianyu/auto_reply_service.py
+  s_f2d23a444bc84b::t_35c911024476cf 1807-1822,1942-1968
+backend-web/app/api/routes/cookies.py
+  s_f2d23a444bc84b::t_35c911024476cf 26,207,352,844-859
+common/db/init_database.py
+  s_f2d23a444bc84b::t_f4f060c75b273b 537-538,2766-2782
+  s_f2d23a444bc84b::t_35c911024476cf 1799-1800
+websocket/pyproject.toml
+  s_f2d23a444bc84b::t_f4f060c75b273b 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "e7ac8cd84490da15dab2e2da32bf12bd3c7a0d1f",
+  "prompts": {},
+  "logical_commit_id": "e7ac8cd84490da15dab2e2da32bf12bd3c7a0d1f",
+  "sessions": {
+    "s_f2d23a444bc84b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fccf9-da67-7470-b245-1b6cc6853e3e",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 208,
+      "total_deletions": 7
+    }
+  }
+}
