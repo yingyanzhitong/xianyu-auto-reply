@@ -1,0 +1,35 @@
+frontend/package.json
+  s_49abcfac670b20::t_427f6763a25f36 4
+skills/prepare-upstream-pr/agents/openai.yaml
+  s_49abcfac670b20::t_bc2c36d41aa19b 1-4
+skills/prepare-upstream-pr/SKILL.md
+  s_49abcfac670b20::t_bc2c36d41aa19b 1-2,4-5,7,9,11,15,22,24,28,30,32,37,41,43,45,50,52,54,58,63,65,67,70,74,76,85,88,97
+  s_49abcfac670b20::t_d75987325b4958 3,6,8,10,12-14,16-21,23,25-27,29,31,33-36,38-40,42,44,46-49,51,53,55-57,59-62,64,66,68-69,71-73,75,77-84,86-87,89-96,98
+CHANGELOG.md
+  s_49abcfac670b20::t_427f6763a25f36 3-6
+package.json
+  s_49abcfac670b20::t_427f6763a25f36 3
+frontend/package-lock.json
+  s_49abcfac670b20::t_826a5639397ca5 3,9
+package-lock.json
+  s_49abcfac670b20::t_47afa1f32db377 3,9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "77c2a063b90da05cfe6203abaf6f4ea434323e02",
+  "prompts": {},
+  "logical_commit_id": "77c2a063b90da05cfe6203abaf6f4ea434323e02",
+  "sessions": {
+    "s_49abcfac670b20": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fc7c6-9d03-75a0-88ae-714ac24d66ef",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>",
+      "total_additions": 171,
+      "total_deletions": 65
+    }
+  }
+}
