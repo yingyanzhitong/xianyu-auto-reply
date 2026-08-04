@@ -628,6 +628,20 @@ class DatabaseInitializer:
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI聊天消息表';
         """,
 
+        # 指定买家和商品的 AI 回复禁用记录
+        "xy_ai_reply_blocks": """
+            CREATE TABLE IF NOT EXISTS xy_ai_reply_blocks (
+                id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+                account_id VARCHAR(80) NOT NULL COMMENT '闲鱼账号ID',
+                buyer_id VARCHAR(64) NOT NULL COMMENT '买家ID',
+                item_id VARCHAR(64) NOT NULL COMMENT '商品ID',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                UNIQUE KEY uk_ai_reply_block_account_buyer_item (account_id, buyer_id, item_id),
+                INDEX idx_ai_reply_block_lookup (account_id, buyer_id, item_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='指定买家商品禁止AI回复表';
+        """,
+
         # 14. 风控日志表
         "xy_risk_control_logs": """
             CREATE TABLE IF NOT EXISTS xy_risk_control_logs (

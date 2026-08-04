@@ -29,6 +29,7 @@ from common.models.xy_keyword_rule import XYKeywordRule
 from common.models.xy_catalog_item import XYCatalogItem
 from common.models.default_reply import DefaultReply, DefaultReplyRecord
 from common.models.xy_order import XYOrder
+from common.models.xy_ai_reply_block import XYAIReplyBlock
 from common.db.session import async_session_maker
 from common.db.redis_client import distributed_lock
 from common.utils.default_reply_api import call_reply_api
@@ -1793,6 +1794,15 @@ class AutoReplyService:
             account = await self._get_account(session)
             if not account:
                 return None
+
+            if await self._is_ai_reply_blocked(session, send_user_id, item_id):
+                logger.info(
+                    f"【{self.cookie_id}】用户 {send_user_id} 的商品 {item_id} 已禁止AI回复，跳过AI回复"
+                )
+                if reply_trace is not None:
+                    reply_trace.setdefault("context_snapshot", {})["ai_blocked_reason"] = "account_buyer_item"
+                    reply_trace.setdefault("context_snapshot", {})["ai_blocked_item_id"] = item_id
+                return None
             
             # 【新增】检查是否开启"已下单用户禁止AI回复"开关
             if account.ai_reply_block_ordered_users:
@@ -1887,6 +1897,30 @@ class AutoReplyService:
         except Exception as e:
             logger.error(f"【{self.cookie_id}】获取AI回复失败: {e}")
             return None
+
+    async def _is_ai_reply_blocked(
+        self,
+        session: AsyncSession,
+        buyer_user_id: str,
+        item_id: Optional[str],
+    ) -> bool:
+        """检查当前账号、买家和商品是否命中精确的 AI 回复禁用记录。"""
+        buyer_id = (buyer_user_id or "").strip()
+        normalized_item_id = (item_id or "").strip()
+        if not buyer_id or not normalized_item_id:
+            return False
+
+        try:
+            stmt = select(exists().where(
+                XYAIReplyBlock.account_id == self.cookie_id,
+                XYAIReplyBlock.buyer_id == buyer_id,
+                XYAIReplyBlock.item_id == normalized_item_id,
+            ))
+            return bool((await session.execute(stmt)).scalar())
+        except Exception as e:
+            logger.error(f"【{self.cookie_id}】检查指定AI回复禁用记录失败: {e}")
+            # 查询异常时保持原有自动回复可用性。
+            return False
 
     async def _check_user_has_orders(self, session: AsyncSession, buyer_user_id: str) -> bool:
         """检查指定买家在当前账号下是否有订单记录

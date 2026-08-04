@@ -13,10 +13,11 @@ import { useMenuVisibilityStore } from '@/store/menuVisibilityStore'
 import { PageLoading } from '@/components/common/Loading'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { DeliveryBlockRulesModal } from './DeliveryBlockRulesModal'
+import { AiReplyBlocksModal } from './AiReplyBlocksModal'
 import { RefundCancelModal } from './RefundCancelModal'
 import type { AccountDetail } from '@/types'
 
-type ModalType = 'qrcode' | 'password' | 'manual' | 'edit' | 'default-reply' | 'ai-settings' | 'proxy-settings' | 'message-expire-time' | 'reply-delay' | 'face-verification' | 'confirm-receipt' | 'auto-rate' | 'delivery-disabled' | 'refund-cancel' | null
+type ModalType = 'qrcode' | 'password' | 'manual' | 'edit' | 'default-reply' | 'ai-settings' | 'proxy-settings' | 'message-expire-time' | 'reply-delay' | 'face-verification' | 'confirm-receipt' | 'auto-rate' | 'delivery-disabled' | 'ai-reply-blocks' | 'refund-cancel' | null
 
 interface AccountWithKeywordCount extends AccountDetail {
   keywordCount?: number
@@ -240,6 +241,7 @@ export function Accounts() {
 
   // 禁止发货设置状态
   const [deliveryDisabledAccount, setDeliveryDisabledAccount] = useState<AccountWithKeywordCount | null>(null)
+  const [aiReplyBlocksAccount, setAiReplyBlocksAccount] = useState<AccountWithKeywordCount | null>(null)
   const [refundCancelAccount, setRefundCancelAccount] = useState<AccountWithKeywordCount | null>(null)
 
   // 确认弹窗状态
@@ -1650,6 +1652,11 @@ export function Accounts() {
     setActiveModal('delivery-disabled')
   }
 
+  const openAiReplyBlocksModal = (account: AccountWithKeywordCount) => {
+    setAiReplyBlocksAccount(account)
+    setActiveModal('ai-reply-blocks')
+  }
+
   // ==================== 退款订单注销设置 ====================
   const openRefundCancelModal = (account: AccountWithKeywordCount) => {
     setRefundCancelAccount(account)
@@ -2333,7 +2340,7 @@ export function Accounts() {
                   <th className="whitespace-nowrap min-w-[120px]">状态</th>
                   <th className="whitespace-nowrap min-w-[90px]">在线状态</th>
                   <th className="whitespace-nowrap min-w-[90px]">配置密码</th>
-                  <th className="whitespace-nowrap min-w-[340px]">功能开关</th>
+                  <th className="whitespace-nowrap min-w-[380px]">功能开关</th>
                   <th className="whitespace-nowrap min-w-[90px]">暂停时间</th>
                   <th className="whitespace-nowrap min-w-[160px] sticky right-0 bg-slate-50 dark:bg-slate-800 z-20">操作</th>
                 </tr>
@@ -2437,6 +2444,14 @@ export function Accounts() {
                           title={`AI回复：${account.aiEnabled ? '已开启（点击关闭）' : '已关闭（点击开启）'}`}
                         >
                           <Bot className="w-3.5 h-3.5" />
+                        </button>
+                        {/* 指定买家商品禁止AI回复 */}
+                        <button
+                          onClick={() => openAiReplyBlocksModal(account)}
+                          className="inline-flex items-center justify-center w-7 h-7 rounded transition-colors bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
+                          title="禁止AI回复：按当前账号、买家ID和商品ID精确配置"
+                        >
+                          <Ban className="w-3.5 h-3.5" />
                         </button>
                         {/* 定时补发货 */}
                         <button
@@ -4181,6 +4196,15 @@ export function Accounts() {
         <DeliveryBlockRulesModal
           accountId={deliveryDisabledAccount.id}
           accountDisplayId={deliveryDisabledAccount.id}
+          onClose={closeModal}
+        />
+      )}
+
+      {/* 指定买家商品禁止AI回复规则 */}
+      {activeModal === 'ai-reply-blocks' && aiReplyBlocksAccount && (
+        <AiReplyBlocksModal
+          accountId={aiReplyBlocksAccount.id}
+          accountDisplayId={aiReplyBlocksAccount.id}
           onClose={closeModal}
         />
       )}

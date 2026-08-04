@@ -292,6 +292,29 @@ export const updateAccountAiReplyBlockOrderedUsers = (id: string, aiReplyBlockOr
   return put(`${COOKIE_PREFIX}/${id}/ai-reply-block-ordered-users`, { ai_reply_block_ordered_users: aiReplyBlockOrderedUsers })
 }
 
+export interface AiReplyBlockItem {
+  id: number
+  buyer_id: string
+  item_id: string
+  created_at: string | null
+}
+
+export const getAccountAiReplyBlocks = (id: string): Promise<ApiResponse<AiReplyBlockItem[]>> => {
+  return get(`${COOKIE_PREFIX}/${id}/ai-reply-blocks`)
+}
+
+export const createAccountAiReplyBlock = (
+  id: string,
+  buyerId: string,
+  itemId: string,
+): Promise<ApiResponse> => {
+  return post(`${COOKIE_PREFIX}/${id}/ai-reply-blocks`, { buyer_id: buyerId, item_id: itemId })
+}
+
+export const deleteAccountAiReplyBlock = (id: string, blockId: number): Promise<ApiResponse> => {
+  return del(`${COOKIE_PREFIX}/${id}/ai-reply-blocks/${blockId}`)
+}
+
 // ==================== 禁止发货规则 ====================
 
 // 禁止发货规则项类型

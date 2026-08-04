@@ -150,6 +150,12 @@ class AccountAiReplyBlockOrderedUsersUpdate(BaseModel):
     ai_reply_block_ordered_users: bool = Field(..., description="已下单用户禁止AI回复开关")
 
 
+class AccountAiReplyBlockCreate(BaseModel):
+    """新增指定买家与商品的 AI 回复禁用记录"""
+    buyer_id: str = Field(..., min_length=1, max_length=64, description="买家ID")
+    item_id: str = Field(..., min_length=1, max_length=64, description="商品ID")
+
+
 class AccountDeliveryDisabledUpdate(BaseModel):
     """禁止发货设置更新（已废弃，保留向后兼容）"""
     delivery_disabled: bool = Field(..., description="禁止发货开关")
