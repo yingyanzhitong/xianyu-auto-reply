@@ -27,6 +27,7 @@ class AccountDetail(BaseModel):
     auto_red_flower: bool = False
     red_flower_after_shipment: bool = False
     ai_reply_block_ordered_users: bool = False
+    ai_reply_block_ordered_items: bool = False
     delivery_disabled: bool = False
     delivery_disabled_reason: str | None = None
     auto_close_order: bool = False
@@ -150,10 +151,9 @@ class AccountAiReplyBlockOrderedUsersUpdate(BaseModel):
     ai_reply_block_ordered_users: bool = Field(..., description="已下单用户禁止AI回复开关")
 
 
-class AccountAiReplyBlockCreate(BaseModel):
-    """新增指定买家与商品的 AI 回复禁用记录"""
-    buyer_id: str = Field(..., min_length=1, max_length=64, description="买家ID")
-    item_id: str = Field(..., min_length=1, max_length=64, description="商品ID")
+class AccountAiReplyBlockOrderedItemsUpdate(BaseModel):
+    """已下单商品禁止AI回复开关更新"""
+    ai_reply_block_ordered_items: bool = Field(..., description="已下单商品禁止AI回复开关")
 
 
 class AccountDeliveryDisabledUpdate(BaseModel):

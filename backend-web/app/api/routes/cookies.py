@@ -16,7 +16,6 @@ from sqlalchemy import func, select, text
 from app.api import deps
 from common.models.user import User
 from common.models.xy_account import XYAccount
-from common.models.xy_ai_reply_block import XYAIReplyBlock
 from common.utils.time_utils import safe_isoformat
 from common.schemas.account import (
     AccountAutoConfirmUpdate,
@@ -25,8 +24,8 @@ from common.schemas.account import (
     AccountBatchStatusUpdate,
     AccountAutoRedFlowerUpdate,
     AccountRedFlowerAfterShipmentUpdate,
+    AccountAiReplyBlockOrderedItemsUpdate,
     AccountAiReplyBlockOrderedUsersUpdate,
-    AccountAiReplyBlockCreate,
     AccountConfirmBeforeSendUpdate,
     AccountCookieUpdate,
     AccountCreate,
@@ -207,6 +206,7 @@ async def list_cookie_details(
                 auto_red_flower=bool(account.auto_red_flower),
                 red_flower_after_shipment=bool(account.red_flower_after_shipment),
                 ai_reply_block_ordered_users=bool(account.ai_reply_block_ordered_users),
+                ai_reply_block_ordered_items=bool(account.ai_reply_block_ordered_items),
                 delivery_disabled=bool(account.delivery_disabled),
                 delivery_disabled_reason=account.delivery_disabled_reason or "",
                 auto_close_order=bool(account.auto_close_order),
@@ -352,6 +352,7 @@ async def list_cookie_details_paginated(
             "auto_red_flower": bool(account.auto_red_flower),
             "red_flower_after_shipment": bool(account.red_flower_after_shipment),
             "ai_reply_block_ordered_users": bool(account.ai_reply_block_ordered_users),
+            "ai_reply_block_ordered_items": bool(account.ai_reply_block_ordered_items),
             "delivery_disabled": bool(account.delivery_disabled),
             "delivery_disabled_reason": account.delivery_disabled_reason or "",
             "auto_close_order": bool(account.auto_close_order),
@@ -872,89 +873,20 @@ async def update_account_ai_reply_block_ordered_users(
     return ApiResponse(success=True, message="已下单用户禁止AI回复设置已更新")
 
 
-@router.get("/{account_id}/ai-reply-blocks", response_model=ApiResponse)
-async def list_account_ai_reply_blocks(
+@router.put("/{account_id}/ai-reply-block-ordered-items", response_model=ApiResponse)
+async def update_account_ai_reply_block_ordered_items(
     account_id: str,
+    payload: AccountAiReplyBlockOrderedItemsUpdate,
     current_user: User = Depends(deps.get_current_active_user),
     account_service: AccountService = Depends(deps.get_account_service),
-    session=Depends(deps.get_db_session),
 ) -> ApiResponse:
-    """获取当前账号的指定买家商品 AI 回复禁用规则。"""
+    """更新已下单商品禁止AI回复开关。"""
     account = await _get_account_or_404(current_user, account_id, account_service)
-    result = await session.execute(
-        select(XYAIReplyBlock)
-        .where(XYAIReplyBlock.account_id == account.account_id)
-        .order_by(XYAIReplyBlock.created_at.desc())
+    await account_service.update_ai_reply_block_ordered_items(
+        account,
+        payload.ai_reply_block_ordered_items,
     )
-    return ApiResponse(
-        success=True,
-        data=[
-            {
-                "id": record.id,
-                "buyer_id": record.buyer_id,
-                "item_id": record.item_id,
-                "created_at": safe_isoformat(record.created_at),
-            }
-            for record in result.scalars().all()
-        ],
-    )
-
-
-@router.post("/{account_id}/ai-reply-blocks", response_model=ApiResponse)
-async def create_account_ai_reply_block(
-    account_id: str,
-    payload: AccountAiReplyBlockCreate,
-    current_user: User = Depends(deps.get_current_active_user),
-    account_service: AccountService = Depends(deps.get_account_service),
-    session=Depends(deps.get_db_session),
-) -> ApiResponse:
-    """为当前账号新增指定买家与商品的 AI 回复禁用规则。"""
-    account = await _get_account_or_404(current_user, account_id, account_service)
-    buyer_id = payload.buyer_id.strip()
-    item_id = payload.item_id.strip()
-    if not buyer_id or not item_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="买家ID和商品ID不能为空")
-
-    existing = (await session.execute(
-        select(XYAIReplyBlock).where(
-            XYAIReplyBlock.account_id == account.account_id,
-            XYAIReplyBlock.buyer_id == buyer_id,
-            XYAIReplyBlock.item_id == item_id,
-        )
-    )).scalar_one_or_none()
-    if existing:
-        return ApiResponse(success=True, message="该禁止AI回复规则已存在")
-
-    session.add(XYAIReplyBlock(
-        account_id=account.account_id,
-        buyer_id=buyer_id,
-        item_id=item_id,
-    ))
-    await session.commit()
-    return ApiResponse(success=True, message="禁止AI回复规则已添加")
-
-
-@router.delete("/{account_id}/ai-reply-blocks/{block_id}", response_model=ApiResponse)
-async def delete_account_ai_reply_block(
-    account_id: str,
-    block_id: int,
-    current_user: User = Depends(deps.get_current_active_user),
-    account_service: AccountService = Depends(deps.get_account_service),
-    session=Depends(deps.get_db_session),
-) -> ApiResponse:
-    """删除当前账号的一条指定买家商品 AI 回复禁用规则。"""
-    account = await _get_account_or_404(current_user, account_id, account_service)
-    record = (await session.execute(
-        select(XYAIReplyBlock).where(
-            XYAIReplyBlock.id == block_id,
-            XYAIReplyBlock.account_id == account.account_id,
-        )
-    )).scalar_one_or_none()
-    if record is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="禁止AI回复规则不存在")
-    await session.delete(record)
-    await session.commit()
-    return ApiResponse(success=True, message="禁止AI回复规则已删除")
+    return ApiResponse(success=True, message="已下单商品禁止AI回复设置已更新")
 
 
 @router.put("/{account_id}/delivery-disabled", response_model=ApiResponse)

@@ -628,20 +628,6 @@ class DatabaseInitializer:
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI聊天消息表';
         """,
 
-        # 指定买家和商品的 AI 回复禁用记录
-        "xy_ai_reply_blocks": """
-            CREATE TABLE IF NOT EXISTS xy_ai_reply_blocks (
-                id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
-                account_id VARCHAR(80) NOT NULL COMMENT '闲鱼账号ID',
-                buyer_id VARCHAR(64) NOT NULL COMMENT '买家ID',
-                item_id VARCHAR(64) NOT NULL COMMENT '商品ID',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-                UNIQUE KEY uk_ai_reply_block_account_buyer_item (account_id, buyer_id, item_id),
-                INDEX idx_ai_reply_block_lookup (account_id, buyer_id, item_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='指定买家商品禁止AI回复表';
-        """,
-
         # 14. 风控日志表
         "xy_risk_control_logs": """
             CREATE TABLE IF NOT EXISTS xy_risk_control_logs (
@@ -1843,7 +1829,8 @@ class DatabaseInitializer:
             ("delivery_only_card_after_close", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '关闭订单后继续发货（只发卡券）'", "auto_close_order"),
             ("delivery_disabled_excluded_items", "JSON DEFAULT NULL COMMENT '禁止发货排除商品列表（item_id 数组，命中后按正常流程发货）'", "delivery_only_card_after_close"),
             ("ai_reply_block_ordered_users", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '已下单用户禁止AI回复'", "delivery_disabled_excluded_items"),
-            ("refund_cancel_enabled", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '退款订单注销开关'", "ai_reply_block_ordered_users"),
+            ("ai_reply_block_ordered_items", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '已下单商品禁止AI回复'", "ai_reply_block_ordered_users"),
+            ("refund_cancel_enabled", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '退款订单注销开关'", "ai_reply_block_ordered_items"),
             ("refund_cancel_url", "VARCHAR(255) DEFAULT NULL COMMENT '退款订单注销请求URL'", "refund_cancel_enabled"),
             ("refund_cancel_timeout", "INT DEFAULT 60 COMMENT '退款订单注销超时时间(秒)'", "refund_cancel_url"),
         ],
@@ -2820,6 +2807,23 @@ class DatabaseInitializer:
                     logger.info("✓ xy_orders: 创建 idx_order_owner_account_buyer_created 复合索引")
             except Exception as e:
                 logger.warning(f"✗ xy_orders idx_order_owner_account_buyer_created 创建失败: {e}")
+
+            # 为“已下单商品禁止AI回复”补建账号、买家、商品复合索引
+            try:
+                check = text("""
+                    SELECT COUNT(*) FROM information_schema.STATISTICS
+                    WHERE TABLE_SCHEMA = DATABASE()
+                    AND TABLE_NAME = 'xy_orders'
+                    AND INDEX_NAME = 'idx_order_account_buyer_item'
+                """)
+                result = await conn.execute(check)
+                if result.scalar() == 0:
+                    await conn.execute(text(
+                        "ALTER TABLE xy_orders ADD INDEX idx_order_account_buyer_item (account_id, buyer_id, item_id)"
+                    ))
+                    logger.info("✓ xy_orders: 创建 idx_order_account_buyer_item 复合索引")
+            except Exception as e:
+                logger.warning(f"✗ xy_orders idx_order_account_buyer_item 创建失败: {e}")
 
             # 为 xy_orders 补建 created_at 索引
             try:

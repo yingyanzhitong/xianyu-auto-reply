@@ -72,6 +72,7 @@ export const getAccountDetailsPaginated = async (
     auto_red_flower?: boolean
     red_flower_after_shipment?: boolean
     ai_reply_block_ordered_users?: boolean
+    ai_reply_block_ordered_items?: boolean
     delivery_disabled?: boolean
     delivery_disabled_reason?: string
     auto_close_order?: boolean
@@ -149,6 +150,7 @@ export const getAccountDetailsPaginated = async (
       auto_red_flower: item.auto_red_flower || false,
       red_flower_after_shipment: item.red_flower_after_shipment || false,
       ai_reply_block_ordered_users: item.ai_reply_block_ordered_users || false,
+      ai_reply_block_ordered_items: item.ai_reply_block_ordered_items || false,
       delivery_disabled: item.delivery_disabled || false,
       delivery_disabled_reason: item.delivery_disabled_reason || '',
       auto_close_order: item.auto_close_order || false,
@@ -292,27 +294,9 @@ export const updateAccountAiReplyBlockOrderedUsers = (id: string, aiReplyBlockOr
   return put(`${COOKIE_PREFIX}/${id}/ai-reply-block-ordered-users`, { ai_reply_block_ordered_users: aiReplyBlockOrderedUsers })
 }
 
-export interface AiReplyBlockItem {
-  id: number
-  buyer_id: string
-  item_id: string
-  created_at: string | null
-}
-
-export const getAccountAiReplyBlocks = (id: string): Promise<ApiResponse<AiReplyBlockItem[]>> => {
-  return get(`${COOKIE_PREFIX}/${id}/ai-reply-blocks`)
-}
-
-export const createAccountAiReplyBlock = (
-  id: string,
-  buyerId: string,
-  itemId: string,
-): Promise<ApiResponse> => {
-  return post(`${COOKIE_PREFIX}/${id}/ai-reply-blocks`, { buyer_id: buyerId, item_id: itemId })
-}
-
-export const deleteAccountAiReplyBlock = (id: string, blockId: number): Promise<ApiResponse> => {
-  return del(`${COOKIE_PREFIX}/${id}/ai-reply-blocks/${blockId}`)
+// 更新已下单商品禁止AI回复开关
+export const updateAccountAiReplyBlockOrderedItems = (id: string, aiReplyBlockOrderedItems: boolean): Promise<ApiResponse> => {
+  return put(`${COOKIE_PREFIX}/${id}/ai-reply-block-ordered-items`, { ai_reply_block_ordered_items: aiReplyBlockOrderedItems })
 }
 
 // ==================== 禁止发货规则 ====================

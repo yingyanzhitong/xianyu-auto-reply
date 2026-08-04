@@ -29,7 +29,6 @@ from common.models.xy_keyword_rule import XYKeywordRule
 from common.models.xy_catalog_item import XYCatalogItem
 from common.models.default_reply import DefaultReply, DefaultReplyRecord
 from common.models.xy_order import XYOrder
-from common.models.xy_ai_reply_block import XYAIReplyBlock
 from common.db.session import async_session_maker
 from common.db.redis_client import distributed_lock
 from common.utils.default_reply_api import call_reply_api
@@ -1795,15 +1794,6 @@ class AutoReplyService:
             if not account:
                 return None
 
-            if await self._is_ai_reply_blocked(session, send_user_id, item_id):
-                logger.info(
-                    f"【{self.cookie_id}】用户 {send_user_id} 的商品 {item_id} 已禁止AI回复，跳过AI回复"
-                )
-                if reply_trace is not None:
-                    reply_trace.setdefault("context_snapshot", {})["ai_blocked_reason"] = "account_buyer_item"
-                    reply_trace.setdefault("context_snapshot", {})["ai_blocked_item_id"] = item_id
-                return None
-            
             # 【新增】检查是否开启"已下单用户禁止AI回复"开关
             if account.ai_reply_block_ordered_users:
                 # 检查该买家是否在订单表中有订单记录
@@ -1814,6 +1804,22 @@ class AutoReplyService:
                         reply_trace.setdefault("context_snapshot", {})["ai_blocked_reason"] = "ordered_user"
                         reply_trace.setdefault("context_snapshot", {})["buyer_has_orders"] = True
                     return None  # 返回None，流程会自动进入默认回复判断
+
+            # 仅在买家已下单当前咨询商品时跳过 AI；咨询其他商品时保持 AI 回复。
+            if account.ai_reply_block_ordered_items:
+                has_ordered_item = await self._check_user_has_order_for_item(
+                    session,
+                    send_user_id,
+                    item_id,
+                )
+                if has_ordered_item:
+                    logger.info(
+                        f"【{self.cookie_id}】用户 {send_user_id} 已下单商品 {item_id}，跳过AI回复"
+                    )
+                    if reply_trace is not None:
+                        reply_trace.setdefault("context_snapshot", {})["ai_blocked_reason"] = "ordered_item"
+                        reply_trace.setdefault("context_snapshot", {})["ordered_item_id"] = item_id
+                    return None
             
             ai_engine = get_ai_reply_engine()
             if not await ai_engine.is_ai_enabled(self.cookie_id, session):
@@ -1898,30 +1904,6 @@ class AutoReplyService:
             logger.error(f"【{self.cookie_id}】获取AI回复失败: {e}")
             return None
 
-    async def _is_ai_reply_blocked(
-        self,
-        session: AsyncSession,
-        buyer_user_id: str,
-        item_id: Optional[str],
-    ) -> bool:
-        """检查当前账号、买家和商品是否命中精确的 AI 回复禁用记录。"""
-        buyer_id = (buyer_user_id or "").strip()
-        normalized_item_id = (item_id or "").strip()
-        if not buyer_id or not normalized_item_id:
-            return False
-
-        try:
-            stmt = select(exists().where(
-                XYAIReplyBlock.account_id == self.cookie_id,
-                XYAIReplyBlock.buyer_id == buyer_id,
-                XYAIReplyBlock.item_id == normalized_item_id,
-            ))
-            return bool((await session.execute(stmt)).scalar())
-        except Exception as e:
-            logger.error(f"【{self.cookie_id}】检查指定AI回复禁用记录失败: {e}")
-            # 查询异常时保持原有自动回复可用性。
-            return False
-
     async def _check_user_has_orders(self, session: AsyncSession, buyer_user_id: str) -> bool:
         """检查指定买家在当前账号下是否有订单记录
         
@@ -1957,4 +1939,31 @@ class AutoReplyService:
             logger.error(f"【{self.cookie_id}】检查买家订单记录失败: {e}")
             logger.error(traceback.format_exc())
             # 出错时返回False，不影响正常流程
+            return False
+
+    async def _check_user_has_order_for_item(
+        self,
+        session: AsyncSession,
+        buyer_user_id: str,
+        item_id: Optional[str],
+    ) -> bool:
+        """检查买家是否在当前账号下已下单当前咨询商品。"""
+        buyer_id = (buyer_user_id or "").strip()
+        normalized_item_id = (item_id or "").strip()
+        if not buyer_id or not normalized_item_id:
+            return False
+
+        try:
+            stmt = select(exists().where(
+                XYOrder.account_id == self.cookie_id,
+                XYOrder.buyer_id == buyer_id,
+                XYOrder.item_id == normalized_item_id,
+                XYOrder.account_id.isnot(None),
+                XYOrder.buyer_id.isnot(None),
+                XYOrder.item_id.isnot(None),
+            ))
+            return bool((await session.execute(stmt)).scalar())
+        except Exception as e:
+            logger.error(f"【{self.cookie_id}】检查买家已下单商品失败: {e}")
+            logger.error(traceback.format_exc())
             return False

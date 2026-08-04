@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, RefreshCw, QrCode, Key, Edit2, Trash2, Power, PowerOff, X, Loader2, Clock, CheckCircle, MessageSquare, Bot, Globe, Timer, ScanFace, ChevronLeft, ChevronRight, ChevronDown, ImagePlus, Filter, Repeat, MoreHorizontal, PackageCheck, Star, ShieldCheck, Flower2, Truck, Eye, EyeOff, Ban, Download, Upload, Send, AlertCircle } from 'lucide-react'
-import { getAccountDetailsPaginated, deleteAccount, updateAccountCookie, updateAccountStatus, updateAccountsStatusBatch, closeAccountsNoticeBatch, clearTokenCacheBatch, updateAccountRemark, addAccount, generateQRLogin, checkQRLoginStatus, passwordLogin, checkPasswordLoginStatus, cancelPasswordLogin, updateAccountAutoConfirm, updateAccountPauseDuration, updateAccountMessageExpireTime, updateAccountReplyDelay, updateAccountLoginInfo, updateAccountScheduledRedelivery, updateAccountScheduledRate, updateAccountAutoPolish, updateAccountConfirmBeforeSend, updateAccountSendBeforeConfirm, updateAccountAutoRedFlower, updateAccountRedFlowerAfterShipment, updateAccountAiReplyBlockOrderedUsers, getAIReplySettings, updateAIReplySettings, testAIConnection, fetchAIModels, AI_PROVIDER_OPTIONS, AI_PROVIDER_DEFAULT_BASE_URLS, getProxyConfig, updateProxyConfig, getFaceVerificationScreenshot, deleteFaceVerificationScreenshot, getConfirmReceiptMessage, updateConfirmReceiptMessage, uploadConfirmReceiptImage, exportAccountsExcel, importAccountsExcel, type AIProviderType, type AIModelOption, type ProxyConfig, type FaceVerificationScreenshot, type AccountFilterParams } from '@/api/accounts'
+import { Plus, RefreshCw, QrCode, Key, Edit2, Trash2, Power, PowerOff, X, Loader2, Clock, CheckCircle, MessageSquare, Bot, Globe, Timer, ScanFace, ChevronLeft, ChevronRight, ChevronDown, ImagePlus, Filter, Repeat, MoreHorizontal, PackageCheck, Star, ShieldCheck, Flower2, Truck, Eye, EyeOff, Ban, Crosshair, Download, Upload, Send, AlertCircle } from 'lucide-react'
+import { getAccountDetailsPaginated, deleteAccount, updateAccountCookie, updateAccountStatus, updateAccountsStatusBatch, closeAccountsNoticeBatch, clearTokenCacheBatch, updateAccountRemark, addAccount, generateQRLogin, checkQRLoginStatus, passwordLogin, checkPasswordLoginStatus, cancelPasswordLogin, updateAccountAutoConfirm, updateAccountPauseDuration, updateAccountMessageExpireTime, updateAccountReplyDelay, updateAccountLoginInfo, updateAccountScheduledRedelivery, updateAccountScheduledRate, updateAccountAutoPolish, updateAccountConfirmBeforeSend, updateAccountSendBeforeConfirm, updateAccountAutoRedFlower, updateAccountRedFlowerAfterShipment, updateAccountAiReplyBlockOrderedUsers, updateAccountAiReplyBlockOrderedItems, getAIReplySettings, updateAIReplySettings, testAIConnection, fetchAIModels, AI_PROVIDER_OPTIONS, AI_PROVIDER_DEFAULT_BASE_URLS, getProxyConfig, updateProxyConfig, getFaceVerificationScreenshot, deleteFaceVerificationScreenshot, getConfirmReceiptMessage, updateConfirmReceiptMessage, uploadConfirmReceiptImage, exportAccountsExcel, importAccountsExcel, type AIProviderType, type AIModelOption, type ProxyConfig, type FaceVerificationScreenshot, type AccountFilterParams } from '@/api/accounts'
 import { getDefaultReply, updateDefaultReply, uploadDefaultReplyImage } from '@/api/keywords'
 import { getAutoRateConfig, updateAutoRateConfig } from '@/api/autoRate'
 import { checkAdminDefaultPassword } from '@/api/auth'
@@ -13,11 +13,10 @@ import { useMenuVisibilityStore } from '@/store/menuVisibilityStore'
 import { PageLoading } from '@/components/common/Loading'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
 import { DeliveryBlockRulesModal } from './DeliveryBlockRulesModal'
-import { AiReplyBlocksModal } from './AiReplyBlocksModal'
 import { RefundCancelModal } from './RefundCancelModal'
 import type { AccountDetail } from '@/types'
 
-type ModalType = 'qrcode' | 'password' | 'manual' | 'edit' | 'default-reply' | 'ai-settings' | 'proxy-settings' | 'message-expire-time' | 'reply-delay' | 'face-verification' | 'confirm-receipt' | 'auto-rate' | 'delivery-disabled' | 'ai-reply-blocks' | 'refund-cancel' | null
+type ModalType = 'qrcode' | 'password' | 'manual' | 'edit' | 'default-reply' | 'ai-settings' | 'proxy-settings' | 'message-expire-time' | 'reply-delay' | 'face-verification' | 'confirm-receipt' | 'auto-rate' | 'delivery-disabled' | 'refund-cancel' | null
 
 interface AccountWithKeywordCount extends AccountDetail {
   keywordCount?: number
@@ -241,7 +240,6 @@ export function Accounts() {
 
   // 禁止发货设置状态
   const [deliveryDisabledAccount, setDeliveryDisabledAccount] = useState<AccountWithKeywordCount | null>(null)
-  const [aiReplyBlocksAccount, setAiReplyBlocksAccount] = useState<AccountWithKeywordCount | null>(null)
   const [refundCancelAccount, setRefundCancelAccount] = useState<AccountWithKeywordCount | null>(null)
 
   // 确认弹窗状态
@@ -1366,6 +1364,24 @@ export function Accounts() {
     }
   }
 
+  // ==================== 已下单商品禁止AI回复开关 ====================
+  const handleToggleAiReplyBlockOrderedItems = async (account: AccountWithKeywordCount) => {
+    const newEnabled = !account.ai_reply_block_ordered_items
+    try {
+      const result = await updateAccountAiReplyBlockOrderedItems(account.id, newEnabled)
+      if (!result.success) {
+        addToast({ type: 'error', message: result.message || '更新已下单商品禁止AI回复开关失败' })
+        return
+      }
+      setAccounts(prev => prev.map(a =>
+        a.id === account.id ? { ...a, ai_reply_block_ordered_items: newEnabled } : a,
+      ))
+      addToast({ type: 'success', message: `已下单商品禁止AI回复已${newEnabled ? '开启' : '关闭'}` })
+    } catch (error) {
+      addToast({ type: 'error', message: getApiErrorMessage(error, '更新已下单商品禁止AI回复开关失败') })
+    }
+  }
+
   // ==================== 自动确认发货开关 ====================
   const handleToggleAutoConfirm = async (account: AccountWithKeywordCount) => {
     const newEnabled = !account.auto_confirm
@@ -1650,11 +1666,6 @@ export function Accounts() {
   const openDeliveryDisabledModal = (account: AccountWithKeywordCount) => {
     setDeliveryDisabledAccount(account)
     setActiveModal('delivery-disabled')
-  }
-
-  const openAiReplyBlocksModal = (account: AccountWithKeywordCount) => {
-    setAiReplyBlocksAccount(account)
-    setActiveModal('ai-reply-blocks')
   }
 
   // ==================== 退款订单注销设置 ====================
@@ -2445,14 +2456,6 @@ export function Accounts() {
                         >
                           <Bot className="w-3.5 h-3.5" />
                         </button>
-                        {/* 指定买家商品禁止AI回复 */}
-                        <button
-                          onClick={() => openAiReplyBlocksModal(account)}
-                          className="inline-flex items-center justify-center w-7 h-7 rounded transition-colors bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
-                          title="禁止AI回复：按当前账号、买家ID和商品ID精确配置"
-                        >
-                          <Ban className="w-3.5 h-3.5" />
-                        </button>
                         {/* 定时补发货 */}
                         <button
                           onClick={() => handleToggleScheduledRedelivery(account)}
@@ -2560,6 +2563,18 @@ export function Accounts() {
                           title={`已下单用户禁止AI回复：${account.ai_reply_block_ordered_users ? '已开启（点击关闭）对已下单用户不使用AI回复' : '已关闭（点击开启）'}`}
                         >
                           <Ban className="w-3.5 h-3.5" />
+                        </button>
+                        {/* 已下单商品禁止AI回复 */}
+                        <button
+                          onClick={() => handleToggleAiReplyBlockOrderedItems(account)}
+                          className={`inline-flex items-center justify-center w-7 h-7 rounded transition-colors ${
+                            account.ai_reply_block_ordered_items
+                              ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50'
+                              : 'bg-slate-100 text-slate-400 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-500 dark:hover:bg-slate-600'
+                          }`}
+                          title={`已下单商品禁止AI回复：${account.ai_reply_block_ordered_items ? '已开启（点击关闭）仅对已下单的当前咨询商品不使用AI回复' : '已关闭（点击开启）'}`}
+                        >
+                          <Crosshair className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -4196,15 +4211,6 @@ export function Accounts() {
         <DeliveryBlockRulesModal
           accountId={deliveryDisabledAccount.id}
           accountDisplayId={deliveryDisabledAccount.id}
-          onClose={closeModal}
-        />
-      )}
-
-      {/* 指定买家商品禁止AI回复规则 */}
-      {activeModal === 'ai-reply-blocks' && aiReplyBlocksAccount && (
-        <AiReplyBlocksModal
-          accountId={aiReplyBlocksAccount.id}
-          accountDisplayId={aiReplyBlocksAccount.id}
           onClose={closeModal}
         />
       )}

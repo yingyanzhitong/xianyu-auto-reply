@@ -62,6 +62,7 @@ export interface Account {
   auto_red_flower?: boolean
   red_flower_after_shipment?: boolean
   ai_reply_block_ordered_users?: boolean
+  ai_reply_block_ordered_items?: boolean
   delivery_disabled?: boolean
   delivery_disabled_reason?: string
   auto_close_order?: boolean
