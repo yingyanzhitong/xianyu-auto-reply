@@ -1,0 +1,54 @@
+frontend/src/api/accounts.ts
+  s_4becad79c59cbc::t_e7b65bec6b896d 478-479,516-521
+websocket/app/services/xianyu/ai_reply_engine.py
+  s_95dd6b16b89c6f::t_92b26e2ad86284 420-421,442-447,797-804,945-951
+backend-web/app/services/ai_reply_service.py
+  s_4becad79c59cbc::t_4ceac9b0c5acb3 36-37,66-71,111-118
+websocket/app/services/xianyu/auto_reply_service.py
+  s_64c382f1285bc9::t_f30b325aa0f94c 249-282,617-618,621-625,692-698,896-903,1867-1883,1960-1990
+common/tests/test_manual_ai_reply_pause.py
+  s_64c382f1285bc9::t_e806b1026afaf3 1-62
+common/schemas/ai_reply.py
+  s_4becad79c59cbc::t_0cc30ad0905ef6 3,20-21,39-40
+websocket/app/services/xianyu/resource_manager.py
+  s_4becad79c59cbc::t_e030af8d0eb328 33-97,180-193
+common/models/auto_reply_message_log.py
+  s_64c382f1285bc9::t_8fe04b0d9dc72c 66
+frontend/src/pages/accounts/Accounts.tsx
+  s_64c382f1285bc9::t_a3114f094da48f 188-189,499-500,1388-1389,1496-1497,1541-1542,3513-3551
+frontend/src/pages/autoReplyLogs/AutoReplyLogs.tsx
+  s_64c382f1285bc9::t_4b872f0259d625 56,111,119,313
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "956fcf8e6593db114d49d17194c88292a6185a95",
+  "prompts": {},
+  "logical_commit_id": "235978b77584e6b653c01bea82b595d72c86f239",
+  "sessions": {
+    "s_4becad79c59cbc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe9e2-c925-7a83-a0ee-06037c0d6a41",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_64c382f1285bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe986-c6fa-7db1-808e-e261bca6c571",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_95dd6b16b89c6f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe9e2-b20c-72f3-bbb8-25f6bfac5da2",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
