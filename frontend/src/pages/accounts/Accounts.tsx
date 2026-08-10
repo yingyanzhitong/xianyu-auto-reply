@@ -185,6 +185,8 @@ export function Accounts() {
   const [aiCustomPrompts, setAiCustomPrompts] = useState('')
   const [aiTimeRangeStart, setAiTimeRangeStart] = useState('')
   const [aiTimeRangeEnd, setAiTimeRangeEnd] = useState('')
+  const [aiManualReplyPauseEnabled, setAiManualReplyPauseEnabled] = useState(false)
+  const [aiManualReplyPauseMinutes, setAiManualReplyPauseMinutes] = useState(10)
   const [aiSettingsSaving, setAiSettingsSaving] = useState(false)
   const [aiSettingsLoading, setAiSettingsLoading] = useState(false)
   const [aiTesting, setAiTesting] = useState(false)
@@ -1421,6 +1423,8 @@ export function Accounts() {
       }
       setAiTimeRangeStart(formatTime(settings.ai_time_range_start))
       setAiTimeRangeEnd(formatTime(settings.ai_time_range_end))
+      setAiManualReplyPauseEnabled(settings.manual_reply_ai_pause_enabled ?? false)
+      setAiManualReplyPauseMinutes(settings.manual_reply_ai_pause_minutes ?? 10)
     } catch (error) {
       const detail = getApiErrorMessage(error, '加载AI设置失败')
       addToast({ type: 'error', message: detail })
@@ -1527,6 +1531,8 @@ export function Accounts() {
         custom_prompts: aiCustomPrompts,
         ai_time_range_start: aiTimeRangeStart,
         ai_time_range_end: aiTimeRangeEnd,
+        manual_reply_ai_pause_enabled: aiManualReplyPauseEnabled,
+        manual_reply_ai_pause_minutes: aiManualReplyPauseMinutes,
       })
       if (!result.success) {
         addToast({ type: 'warning', message: result.message || 'AI配置未填写完整，无法开启AI回复' })
@@ -1570,6 +1576,8 @@ export function Accounts() {
         custom_prompts: aiCustomPrompts,
         ai_time_range_start: aiTimeRangeStart,
         ai_time_range_end: aiTimeRangeEnd,
+        manual_reply_ai_pause_enabled: aiManualReplyPauseEnabled,
+        manual_reply_ai_pause_minutes: aiManualReplyPauseMinutes,
       })
       if (!saveResult.success) {
         addToast({ type: 'warning', message: saveResult.message || 'AI配置未填写完整，无法测试AI连接' })
@@ -3511,59 +3519,98 @@ export function Accounts() {
 
                   {/* 启用时间段选择 */}
                   {aiEnabled && (
-                    <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3.5 border border-slate-100 dark:border-slate-800 space-y-3 transition-all duration-300">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">启用时间范围</label>
-                        {(aiTimeRangeStart || aiTimeRangeEnd) && (
+                    <div className="space-y-3">
+                      <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3.5 border border-slate-100 dark:border-slate-800 space-y-3 transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">启用时间范围</label>
+                          {(aiTimeRangeStart || aiTimeRangeEnd) && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAiTimeRangeStart('')
+                                setAiTimeRangeEnd('')
+                              }}
+                              className="text-xs text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 font-medium transition-colors"
+                            >
+                              重置为全天
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 relative">
+                            <input
+                              type="time"
+                              value={aiTimeRangeStart}
+                              onChange={(e) => setAiTimeRangeStart(e.target.value)}
+                              className="input-ios w-full pl-3 pr-10 text-sm font-medium"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500 pointer-events-none uppercase">
+                              开始
+                            </span>
+                          </div>
+                          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">至</span>
+                          <div className="flex-1 relative">
+                            <input
+                              type="time"
+                              value={aiTimeRangeEnd}
+                              onChange={(e) => setAiTimeRangeEnd(e.target.value)}
+                              className="input-ios w-full pl-3 pr-10 text-sm font-medium"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500 pointer-events-none uppercase">
+                              结束
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {aiTimeRangeStart && aiTimeRangeEnd ? (
+                            <span>
+                              当前配置：每天 <strong className="text-blue-600 dark:text-blue-400">{aiTimeRangeStart}</strong> 到 <strong className="text-blue-600 dark:text-blue-400">{aiTimeRangeEnd}</strong>
+                              {aiTimeRangeStart > aiTimeRangeEnd ? <span className="text-amber-500 dark:text-amber-400 font-medium">（跨天至次日）</span> : ''} 启用AI自动回复。其余时间将使用普通规则回复。
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 dark:text-slate-500">
+                              未设置时间范围，默认全天 24 小时启用AI自动回复。
+                            </span>
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-50 dark:bg-slate-800/40 rounded-xl p-3.5 border border-slate-100 dark:border-slate-800 space-y-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">人工回复后暂停 AI</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">仅暂停相同商品 ID 和买家 ID 的 AI 回复，关键词和默认回复仍正常执行。</p>
+                          </div>
                           <button
                             type="button"
-                            onClick={() => {
-                              setAiTimeRangeStart('')
-                              setAiTimeRangeEnd('')
-                            }}
-                            className="text-xs text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 font-medium transition-colors"
+                            onClick={() => setAiManualReplyPauseEnabled(value => !value)}
+                            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                              aiManualReplyPauseEnabled ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                            }`}
+                            aria-label="切换人工回复后暂停 AI"
                           >
-                            重置为全天
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                aiManualReplyPauseEnabled ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
                           </button>
+                        </div>
+                        {aiManualReplyPauseEnabled && (
+                          <div className="flex items-center gap-3">
+                            <label className="input-label mb-0 shrink-0">暂停时长</label>
+                            <input
+                              type="number"
+                              value={aiManualReplyPauseMinutes}
+                              onChange={(e) => setAiManualReplyPauseMinutes(Number(e.target.value))}
+                              className="input-ios w-28"
+                              min="1"
+                              max="1440"
+                            />
+                            <span className="text-sm text-slate-500 dark:text-slate-400">分钟（1–1440）</span>
+                          </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 relative">
-                          <input
-                            type="time"
-                            value={aiTimeRangeStart}
-                            onChange={(e) => setAiTimeRangeStart(e.target.value)}
-                            className="input-ios w-full pl-3 pr-10 text-sm font-medium"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500 pointer-events-none uppercase">
-                            开始
-                          </span>
-                        </div>
-                        <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">至</span>
-                        <div className="flex-1 relative">
-                          <input
-                            type="time"
-                            value={aiTimeRangeEnd}
-                            onChange={(e) => setAiTimeRangeEnd(e.target.value)}
-                            className="input-ios w-full pl-3 pr-10 text-sm font-medium"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 dark:text-slate-500 pointer-events-none uppercase">
-                            结束
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        {aiTimeRangeStart && aiTimeRangeEnd ? (
-                          <span>
-                            当前配置：每天 <strong className="text-blue-600 dark:text-blue-400">{aiTimeRangeStart}</strong> 到 <strong className="text-blue-600 dark:text-blue-400">{aiTimeRangeEnd}</strong>
-                            {aiTimeRangeStart > aiTimeRangeEnd ? <span className="text-amber-500 dark:text-amber-400 font-medium">（跨天至次日）</span> : ''} 启用AI自动回复。其余时间将使用普通规则回复。
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 dark:text-slate-500">
-                            未设置时间范围，默认全天 24 小时启用AI自动回复。
-                          </span>
-                        )}
-                      </p>
                     </div>
                   )}
 
