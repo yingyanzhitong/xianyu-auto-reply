@@ -1,0 +1,38 @@
+backend-web/app/services/ai_reply_service.py
+  s_b8ba273947b220::t_d224f5421708a6 36-37,66-71,111-118
+common/schemas/ai_reply.py
+  s_b8ba273947b220::t_78063d60a6fcc5 3,20-21,39-40
+frontend/src/api/accounts.ts
+  s_b8ba273947b220::t_5742125ec19f49 492-493,530-535
+websocket/app/services/xianyu/ai_reply_engine.py
+  s_b8ba273947b220::t_ac9ad6a480901c 420-421,442-447,797-804,945-951
+websocket/app/services/xianyu/resource_manager.py
+  s_b8ba273947b220::t_868e8a5758c316 33-38,40-97,180-193
+frontend/src/pages/accounts/Accounts.tsx
+  s_64c382f1285bc9::t_be0acb5f43dfc5 188-189,1426-1427,1534-1535,1579-1580,3522-3583,3586-3590,3592-3596,3599-3611,3613
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "199f9c32ef5092978996893a59570fdb24616664",
+  "prompts": {},
+  "logical_commit_id": "199f9c32ef5092978996893a59570fdb24616664",
+  "sessions": {
+    "s_64c382f1285bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe986-c6fa-7db1-808e-e261bca6c571",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_b8ba273947b220": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe409-2ae5-7323-9671-38ec46b8c6ea",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
