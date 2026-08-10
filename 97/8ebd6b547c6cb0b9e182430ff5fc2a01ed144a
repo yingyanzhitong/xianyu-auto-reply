@@ -1,0 +1,32 @@
+CHANGELOG.md
+  s_64c382f1285bc9::t_0282fdb6a99721 3-6
+common/tests/test_manual_ai_reply_pause.py
+  s_64c382f1285bc9::t_532e22f6fe1834 60-70
+frontend/package-lock.json
+  s_64c382f1285bc9::t_e80e75956a20dd 3,9
+frontend/package.json
+  s_64c382f1285bc9::t_85fc7e1915500f 4
+package-lock.json
+  s_64c382f1285bc9::t_90192feca3dcc7 3,9
+package.json
+  s_64c382f1285bc9::t_09b2971bd46a22 3
+websocket/app/services/xianyu/auto_reply_service.py
+  s_64c382f1285bc9::t_bd45f0d9b67164 32,1997-2009,2020-2073
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "978ebd6b547c6cb0b9e182430ff5fc2a01ed144a",
+  "prompts": {},
+  "logical_commit_id": "978ebd6b547c6cb0b9e182430ff5fc2a01ed144a",
+  "sessions": {
+    "s_64c382f1285bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe986-c6fa-7db1-808e-e261bca6c571",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
