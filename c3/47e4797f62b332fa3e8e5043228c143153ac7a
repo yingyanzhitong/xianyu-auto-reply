@@ -1,0 +1,20 @@
+frontend/src/components/layout/Sidebar.tsx
+  s_fb5faf914ef2ef::t_396009d8040bbc 35,282,287-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c347e4797f62b332fa3e8e5043228c143153ac7a",
+  "prompts": {},
+  "logical_commit_id": "32234ed679bf5f89e93f23463753692953fcdc5a",
+  "sessions": {
+    "s_fb5faf914ef2ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe9e2-df96-7751-890b-d447dd697636",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
