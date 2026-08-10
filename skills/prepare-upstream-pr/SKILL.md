@@ -38,6 +38,7 @@ git diff <commit>^ <commit> -- <候选路径>
 - 提交只含目标功能时，可以采用等效补丁或谨慎 cherry-pick。
 - 提交混有订单、页面、发布、配置或其他功能时，只手工补入目标代码和相应测试；不要整体 cherry-pick。
 - 每一处变更都必须能追溯到用户选定的功能点。保留上游已有代码风格和行为。
+- 上游 PR 默认不得修改任何路径下的 `package.json`、`package-lock.json` 或 `CHANGELOG.md`；只有用户明确要求时才可例外。候选提交含这些发布性改动时，提取功能补丁时必须剔除。
 
 ## 从上游基线创建分支
 
@@ -59,9 +60,11 @@ git merge-base --is-ancestor base/main HEAD
 ```bash
 git diff --stat base/main...HEAD
 git diff --check base/main...HEAD
+git diff --name-only base/main...HEAD
 ```
 
-- 遵从项目提交规则：如要求版本和中文 `CHANGELOG.md`，只递增所属组件版本；如要求标签，确认标签未占用后推送到 fork。不要因为创建上游 PR 擅自部署生产环境。
+- 创建上游 PR 不属于发布：即使项目本地提交规则要求版本和中文 `CHANGELOG.md`，默认也不要在上游 PR 中递增版本、更新锁文件或新增更新日志。仅当用户明确要求时，才按其指定范围处理这些文件。
+- 推送前必须确认完整差异中不含 `package.json`、`package-lock.json`、`CHANGELOG.md`（包含子目录中的同名文件）；若出现，先移除再继续。不要因为创建上游 PR 擅自部署生产环境。
 
 ## 提交、推送与正式 PR
 
@@ -95,4 +98,4 @@ gh pr view <number> --repo <upstream-owner>/<repo> \
   --json url,state,isDraft,baseRefName,headRefName,commits,changedFiles
 ```
 
-完成条件：`state` 为 `OPEN`、`isDraft` 为 `false`、`baseRefName` 为 `main`，且变更与 `base/main...HEAD` 的审查结果一致。报告 PR 链接、分支、提交、验证结果和未验证边界。
+完成条件：`state` 为 `OPEN`、`isDraft` 为 `false`、`baseRefName` 为 `main`，且变更与 `base/main...HEAD` 的审查结果一致，并且未包含 `package.json`、`package-lock.json`、`CHANGELOG.md`（除非用户明确要求）。报告 PR 链接、分支、提交、验证结果和未验证边界。
