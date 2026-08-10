@@ -1,0 +1,20 @@
+frontend/src/pages/cards/CardFormModal.tsx
+  s_64c382f1285bc9::t_2fbb07a987babc 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8a8c801ffc71347d3841f67b9c9cee2cee7fc50b",
+  "prompts": {},
+  "logical_commit_id": "8a8c801ffc71347d3841f67b9c9cee2cee7fc50b",
+  "sessions": {
+    "s_64c382f1285bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe986-c6fa-7db1-808e-e261bca6c571",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
