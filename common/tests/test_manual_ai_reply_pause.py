@@ -51,7 +51,10 @@ class ManualAiReplyPauseTest(unittest.TestCase):
         self.assertIn('\"reply_strategy\": \"ai\"', auto_reply)
         self.assertIn('\"matched_rule_type\": \"ai\"', auto_reply)
         self.assertIn('\"send_status\": \"paused\"', auto_reply)
-        self.assertIn('f\"暂停ai回复{pause_minutes}分钟\"', auto_reply)
+        self.assertIn(
+            'f\"暂停ai回复{pause_minutes}分钟，预计恢复时间：{pause_end_time}\"',
+            auto_reply,
+        )
         self.assertIn("paused: '暂停回复'", frontend)
 
 

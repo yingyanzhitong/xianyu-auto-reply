@@ -251,9 +251,14 @@ class AutoReplyService:
         self, log_payload: Dict[str, Any], remaining_seconds: int, pause_minutes: int
     ) -> None:
         """记录人工回复暂停 AI 的消息日志，不影响后续默认回复。"""
+        pause_end_time = time.strftime(
+            "%Y-%m-%d %H:%M:%S",
+            time.localtime(time.time() + remaining_seconds),
+        )
         context_snapshot = dict(log_payload.get("context_snapshot") or {})
         context_snapshot.update({
             "manual_reply_ai_pause_remaining_seconds": remaining_seconds,
+            "manual_reply_ai_pause_ends_at": pause_end_time,
             "manual_reply_ai_pause_buyer_id": log_payload.get("sender_user_id"),
             "manual_reply_ai_pause_item_id": log_payload.get("item_id") or "",
         })
@@ -268,7 +273,9 @@ class AutoReplyService:
             "reply_image_url": None,
             "reply_segments": [],
             "send_status": "paused",
-            "send_fail_reason": f"暂停ai回复{pause_minutes}分钟",
+            "send_fail_reason": (
+                f"暂停ai回复{pause_minutes}分钟，预计恢复时间：{pause_end_time}"
+            ),
             "send_result_json": None,
             "context_snapshot": context_snapshot,
         }
