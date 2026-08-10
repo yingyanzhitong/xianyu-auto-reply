@@ -29,6 +29,7 @@ from common.models.xy_keyword_rule import XYKeywordRule
 from common.models.xy_catalog_item import XYCatalogItem
 from common.models.default_reply import DefaultReply, DefaultReplyRecord
 from common.models.xy_order import XYOrder
+from common.models.auto_reply_message_log import XYAutoReplyMessageLog
 from common.db.session import async_session_maker
 from common.db.redis_client import distributed_lock
 from common.utils.default_reply_api import call_reply_api
@@ -1993,6 +1994,19 @@ class AutoReplyService:
             paused_context = pause_manager.pause_ai_reply_for_manual_message(
                 chat_id, self.cookie_id, item_id, pause_minutes
             )
+            if not paused_context:
+                # WebSocket 重启后内存上下文会丢失。回查同会话最近的买家消息日志，
+                # 恢复买家 ID 后再建立精确的「账号 + 买家 + 商品」AI 暂停。
+                seller_id = str(
+                    getattr(self.xianyu_instance, "myid", self.cookie_id) or ""
+                ).strip()
+                restored_context = await self._restore_buyer_context_from_logs(
+                    chat_id, item_id, seller_id
+                )
+                if restored_context:
+                    paused_context = pause_manager.pause_ai_reply_for_manual_message(
+                        chat_id, self.cookie_id, item_id, pause_minutes
+                    )
             if paused_context:
                 buyer_id, paused_item_id = paused_context
                 log_payload.setdefault("context_snapshot", {}).update({
@@ -2003,6 +2017,60 @@ class AutoReplyService:
             return True
         except Exception as e:
             logger.warning(f"【{self.cookie_id}】设置人工回复 AI 暂停失败: {e}")
+            return False
+
+    async def _restore_buyer_context_from_logs(
+        self, chat_id: str, item_id: str, seller_id: str
+    ) -> bool:
+        """在进程重启后从消息日志恢复会话的最近买家与商品上下文。"""
+        normalized_chat_id = str(chat_id or "").strip()
+        normalized_item_id = str(item_id or "").strip()
+        normalized_seller_id = str(seller_id or "").strip()
+        if not normalized_chat_id or not normalized_seller_id:
+            return False
+
+        try:
+            async with async_session_maker() as session:
+                stmt = (
+                    select(
+                        XYAutoReplyMessageLog.sender_user_id,
+                        XYAutoReplyMessageLog.item_id,
+                    )
+                    .where(
+                        XYAutoReplyMessageLog.account_id == self.cookie_id,
+                        XYAutoReplyMessageLog.chat_id == normalized_chat_id,
+                        XYAutoReplyMessageLog.sender_user_id != normalized_seller_id,
+                        XYAutoReplyMessageLog.sender_user_id != "unknown",
+                    )
+                    .order_by(
+                        XYAutoReplyMessageLog.created_at.desc(),
+                        XYAutoReplyMessageLog.id.desc(),
+                    )
+                    .limit(1)
+                )
+                row = (await session.execute(stmt)).first()
+
+            if not row:
+                return False
+
+            buyer_id = str(row[0] or "").strip()
+            remembered_item_id = str(row[1] or "").strip()
+            target_item_id = normalized_item_id or remembered_item_id
+            if not buyer_id or not target_item_id:
+                return False
+
+            pause_manager.remember_buyer_context(
+                normalized_chat_id, self.cookie_id, buyer_id, target_item_id
+            )
+            logger.info(
+                f"【{self.cookie_id}】从消息日志恢复人工回复 AI 暂停上下文："
+                f"buyer_id={buyer_id}, item_id={target_item_id}"
+            )
+            return True
+        except Exception as e:
+            logger.warning(
+                f"【{self.cookie_id}】从消息日志恢复人工回复 AI 暂停上下文失败: {e}"
+            )
             return False
 
     async def _check_user_has_orders(self, session: AsyncSession, buyer_user_id: str) -> bool:

@@ -57,6 +57,17 @@ class ManualAiReplyPauseTest(unittest.TestCase):
         )
         self.assertIn("paused: '暂停回复'", frontend)
 
+    def test_manual_pause_recovers_buyer_context_after_websocket_restart(self):
+        auto_reply = (ROOT / "websocket/app/services/xianyu/auto_reply_service.py").read_text(encoding="utf-8")
+
+        self.assertIn("from common.models.auto_reply_message_log import XYAutoReplyMessageLog", auto_reply)
+        self.assertIn("async def _restore_buyer_context_from_logs", auto_reply)
+        self.assertIn("XYAutoReplyMessageLog.account_id == self.cookie_id", auto_reply)
+        self.assertIn("XYAutoReplyMessageLog.chat_id == normalized_chat_id", auto_reply)
+        self.assertIn("XYAutoReplyMessageLog.sender_user_id != normalized_seller_id", auto_reply)
+        self.assertIn("await self._restore_buyer_context_from_logs(", auto_reply)
+        self.assertIn("pause_manager.remember_buyer_context(", auto_reply)
+
 
 if __name__ == "__main__":
     unittest.main()
