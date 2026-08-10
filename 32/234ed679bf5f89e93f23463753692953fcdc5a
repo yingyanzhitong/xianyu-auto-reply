@@ -1,0 +1,34 @@
+CHANGELOG.md
+  s_4becad79c59cbc::t_3d225bf8ef0c3c 1-5
+frontend/package-lock.json
+  s_4becad79c59cbc::t_1e779f20d3a9a2 3,9
+frontend/package.json
+  s_4becad79c59cbc::t_d4ca4fae6bf9c5 4
+frontend/src/components/layout/Sidebar.tsx
+  s_fb5faf914ef2ef::t_396009d8040bbc 35,282,287-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "32234ed679bf5f89e93f23463753692953fcdc5a",
+  "prompts": {},
+  "logical_commit_id": "32234ed679bf5f89e93f23463753692953fcdc5a",
+  "sessions": {
+    "s_4becad79c59cbc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe9e2-c925-7a83-a0ee-06037c0d6a41",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_fb5faf914ef2ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe9e2-df96-7751-890b-d447dd697636",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
