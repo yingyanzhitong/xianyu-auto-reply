@@ -1,0 +1,20 @@
+skills/prepare-upstream-pr/SKILL.md
+  s_64c382f1285bc9::t_7155306639e29f 41,63,66-67,101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "756f5daf26f10aa69dfbff6d0dd752e6b991429f",
+  "prompts": {},
+  "logical_commit_id": "756f5daf26f10aa69dfbff6d0dd752e6b991429f",
+  "sessions": {
+    "s_64c382f1285bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fe986-c6fa-7db1-808e-e261bca6c571",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
