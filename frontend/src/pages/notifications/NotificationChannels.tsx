@@ -159,19 +159,15 @@ const defaultTemplates: Record<NotificationTemplateType, string> = {
   chat: `【闲鱼消息】
 闲鱼账号: {{account}}
 发送者: {{buyer_nick}}
-买家ID: {{buyer_id}}
 消息: {{message}}
 商品ID: {{item_id}}
-聊天ID: {{chat_id}}
 时间: {{time}}`,
   delivery: `🚨 自动发货通知
 
 闲鱼账号: {{account}}
-买家昵称: {{buyer_nick}}
-买家ID: {{buyer_id}}
+买家: {{buyer_nick}} (ID: {{buyer_id}})
 订单金额: {{amount}}
 购买数量: {{quantity}}
-订单ID: {{order_id}}
 商品ID: {{item_id}}
 聊天ID: {{chat_id}}
 结果: {{result}}
@@ -183,7 +179,8 @@ const defaultTemplates: Record<NotificationTemplateType, string> = {
 闲鱼账号: {{account}}
 时间: {{time}}
 详情: {{detail}}
-{{verification_info}}`,
+
+请检查账号状态。`,
 }
 
 const templateDefinitions: Array<{ type: NotificationTemplateType; label: string }> = [
@@ -404,7 +401,7 @@ export function NotificationChannels() {
           addToast({ type: 'error', message: `${definition.label}${validationError}` })
           return
         }
-        if (template.trim()) {
+        if (template.trim() && template !== defaultTemplates[definition.type]) {
           config[templateConfigKeys[definition.type]] = template
         }
       }
@@ -626,7 +623,7 @@ export function NotificationChannels() {
                   <div>
                     <p className="input-label">通知正文模板</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      支持英文占位符，例如 {'{{buyer_nick}}'}；留空可恢复系统默认正文。
+                      预填为系统默认正文；修改后才会保存为自定义模板，留空可恢复系统默认正文。支持英文占位符，例如 {'{{buyer_nick}}'}。
                     </p>
                   </div>
                   {templateDefinitions.map((definition) => (
