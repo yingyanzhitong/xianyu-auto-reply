@@ -114,10 +114,45 @@ const templateConfigKeys: Record<NotificationTemplateType, string> = {
   account: 'account_template',
 }
 
-const templateVariables: Record<NotificationTemplateType, string[]> = {
-  chat: ['account', 'account_id', 'account_remark', 'buyer_nick', 'buyer_id', 'message', 'item_id', 'chat_id', 'time'],
-  delivery: ['account', 'account_id', 'account_remark', 'buyer_nick', 'buyer_id', 'message', 'item_id', 'chat_id', 'time', 'order_id', 'amount', 'quantity', 'result'],
-  account: ['account', 'account_id', 'account_remark', 'title', 'notification_type', 'detail', 'chat_id', 'verification_url', 'verification_info', 'time'],
+const templateVariables: Record<NotificationTemplateType, Array<{ name: string; label: string }>> = {
+  chat: [
+    { name: 'account', label: '闲鱼账号' },
+    { name: 'account_id', label: '账号 ID' },
+    { name: 'account_remark', label: '账号备注' },
+    { name: 'buyer_nick', label: '买家昵称' },
+    { name: 'buyer_id', label: '买家 ID' },
+    { name: 'message', label: '消息内容' },
+    { name: 'item_id', label: '商品 ID' },
+    { name: 'chat_id', label: '聊天 ID' },
+    { name: 'time', label: '通知时间' },
+  ],
+  delivery: [
+    { name: 'account', label: '闲鱼账号' },
+    { name: 'account_id', label: '账号 ID' },
+    { name: 'account_remark', label: '账号备注' },
+    { name: 'buyer_nick', label: '买家昵称' },
+    { name: 'buyer_id', label: '买家 ID' },
+    { name: 'message', label: '消息内容' },
+    { name: 'item_id', label: '商品 ID' },
+    { name: 'chat_id', label: '聊天 ID' },
+    { name: 'time', label: '通知时间' },
+    { name: 'order_id', label: '订单 ID' },
+    { name: 'amount', label: '订单金额' },
+    { name: 'quantity', label: '购买数量' },
+    { name: 'result', label: '发货结果' },
+  ],
+  account: [
+    { name: 'account', label: '闲鱼账号' },
+    { name: 'account_id', label: '账号 ID' },
+    { name: 'account_remark', label: '账号备注' },
+    { name: 'title', label: '通知标题' },
+    { name: 'notification_type', label: '通知类型' },
+    { name: 'detail', label: '详细说明' },
+    { name: 'chat_id', label: '聊天 ID' },
+    { name: 'verification_url', label: '验证链接' },
+    { name: 'verification_info', label: '验证信息' },
+    { name: 'time', label: '通知时间' },
+  ],
 }
 
 const defaultTemplates: Record<NotificationTemplateType, string> = {
@@ -167,7 +202,7 @@ const getTemplateValidationError = (template: string, templateType: Notification
     return '占位符必须使用 {{variable}} 格式'
   }
 
-  const unknownVariables = [...new Set(placeholders.map((match) => match[1]).filter((name) => !templateVariables[templateType].includes(name)))]
+  const unknownVariables = [...new Set(placeholders.map((match) => match[1]).filter((name) => !templateVariables[templateType].some((variable) => variable.name === name)))]
   if (unknownVariables.length > 0) {
     return `不支持的占位符: ${unknownVariables.join(', ')}`
   }
@@ -606,7 +641,7 @@ export function NotificationChannels() {
                         className="input-ios h-32 resize-y font-mono text-sm"
                       />
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 break-words">
-                        可用变量：{templateVariables[definition.type].map((name) => `{{${name}}}`).join('、')}
+                        可用变量：{templateVariables[definition.type].map(({ name, label }) => `{{${name}}}（${label}）`).join('、')}
                       </p>
                     </div>
                   ))}
