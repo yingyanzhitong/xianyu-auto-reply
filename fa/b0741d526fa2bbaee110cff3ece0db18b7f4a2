@@ -1,0 +1,36 @@
+common/db/compat.py
+  s_ba72aabed0be2b::t_504b7bfc11c981 662-663
+common/tests/test_notification_dispatch.py
+  s_ba72aabed0be2b::t_e11c01af6bf6ee 1-189
+common/tests/test_notification_template.py
+  s_ba72aabed0be2b::t_2e095ae6539203 1-72
+common/utils/notification_template.py
+  s_ba72aabed0be2b::t_83d7d240e26406 1-103
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_ba72aabed0be2b::t_1ecf212efcc2d4 109-226,241,344,356-358,364,385,396-408,589,621-644
+websocket/app/services/xianyu/auto_reply_service.py
+  s_ba72aabed0be2b::t_176aab4548ce6b 35,1005-1015,1041-1046,1049,1051,1053,1055,1057,1059,1061,1063
+websocket/app/services/xianyu/notification_manager.py
+  s_ba72aabed0be2b::t_7ed59375d582ad 14,30,97,136-151,157-159,192-214,218-221,228-247,344-361,417-418,443-448,451,454,457,460,463,466,469,472
+websocket/app/services/xianyu/yifan_api_handler.py
+  s_ba72aabed0be2b::t_fae4d44bcf955d 65-74,76,218,220-223,326,328-331
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_ba72aabed0be2b::t_ed789768bbb084 481-482,487-494,1519,1531,1540,1547-1550,1562,1573,1576-1580,1582-1585,1696-1699,1715-1718
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "fab0741d526fa2bbaee110cff3ece0db18b7f4a2",
+  "prompts": {},
+  "logical_commit_id": "fab0741d526fa2bbaee110cff3ece0db18b7f4a2",
+  "sessions": {
+    "s_ba72aabed0be2b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fee98-c7c0-7d23-bfaf-8e8f4d4c284d",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
