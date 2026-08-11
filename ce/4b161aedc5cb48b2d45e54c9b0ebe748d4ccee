@@ -1,0 +1,22 @@
+common/tests/test_notification_dispatch.py
+  s_ba72aabed0be2b::t_eded49cbf4b812 82-111
+websocket/app/services/xianyu/notification_manager.py
+  s_ba72aabed0be2b::t_dec68e30147305 218
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ce4b161aedc5cb48b2d45e54c9b0ebe748d4ccee",
+  "prompts": {},
+  "logical_commit_id": "ce4b161aedc5cb48b2d45e54c9b0ebe748d4ccee",
+  "sessions": {
+    "s_ba72aabed0be2b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fee98-c7c0-7d23-bfaf-8e8f4d4c284d",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
