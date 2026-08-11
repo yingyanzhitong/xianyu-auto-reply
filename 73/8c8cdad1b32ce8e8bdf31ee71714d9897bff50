@@ -1,0 +1,56 @@
+backend-web/app/api/routes/product_publish.py
+  s_9848638a476476::t_ff9b9bc5d8e805 12,19,25,28,57-68,85-91,117-123,171-174,272-279,585-766,939-995
+backend-web/app/services/product_publish_service.py
+  s_9848638a476476::t_b17944d78907a1 11,25-91,113,128,313,315,317-318,320-330,384-390
+backend-web/app/services/shop_publish_execution_service.py
+  s_9848638a476476::t_2f523b816c02fd 1-200
+backend-web/tests/test_gamer520_external_api.py
+  s_9848638a476476::t_5d0f8336ed74d0 18-19,24,31-32,285-345,467-502
+common/db/init_database.py
+  s_9848638a476476::t_3987dc0d8f981c 1272-1278,1314-1337,1918-1924
+common/models/_exports.py
+  s_9848638a476476::t_1617f0b10a4ae3 47,116
+common/models/product_material.py
+  s_9848638a476476::t_d6a7f61b0adb56 45-51
+common/models/shop_publish_batch.py
+  s_9848638a476476::t_c505f59109931d 1-33
+common/services/shop_fans_price_service.py
+  s_9848638a476476::t_e22de4bdb28fa1 1-67
+common/services/shop_xianyu_publish_service.py
+  s_9848638a476476::t_f4fb588b708fae 1-10
+common/services/shop_xianyu_publisher.py
+  s_9848638a476476::t_ca30c99572cb92 1-146
+frontend/src/App.tsx
+  s_9848638a476476::t_709b602b7026d9 65,370
+frontend/src/api/productPublish.ts
+  s_9848638a476476::t_83a317d3e0167d 16-17,34-40,58-64,158-185,255-264
+frontend/src/components/layout/TabsBar.tsx
+  s_9848638a476476::t_f4ed7f5c35cc55 84
+frontend/src/config/navigation.ts
+  s_9848638a476476::t_4a8bbf76337459 114
+frontend/src/pages/product-publish/MaterialFormModal.tsx
+  s_9848638a476476::t_3700ad8dac65d0 10,15-20,46-52,84-90,112,177-234
+frontend/src/pages/product-publish/ProductMaterials.tsx
+  s_9848638a476476::t_941956d3e61b77 23-48,295,302,306,312-314,341-346,363-364
+frontend/src/pages/product-publish/PublishLogs.tsx
+  s_9848638a476476::t_1160b71474ed8a 254-264,266-267
+frontend/src/pages/product-publish/ShopBatchPublish.tsx
+  s_9848638a476476::t_9eae88af750f00 1-261
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "738c8cdad1b32ce8e8bdf31ee71714d9897bff50",
+  "prompts": {},
+  "logical_commit_id": "738c8cdad1b32ce8e8bdf31ee71714d9897bff50",
+  "sessions": {
+    "s_9848638a476476": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fef74-fafc-7c31-8a53-8788fb235824",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
