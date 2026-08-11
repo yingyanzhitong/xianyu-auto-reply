@@ -251,13 +251,20 @@ export function PublishLogs() {
                     <td><span className={s.cls}>{s.label}</span></td>
                     <td className="max-w-[200px]">
                       {log.item_url ? (
-                        <a href={log.item_url} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-sm text-blue-500 hover:underline">
-                          <ExternalLink className="w-3 h-3" />查看商品
-                        </a>
+                        <div className="space-y-1">
+                          <a href={log.item_url} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-sm text-blue-500 hover:underline">
+                            <ExternalLink className="w-3 h-3" />查看商品
+                          </a>
+                          {log.error_message && (
+                            <span className="text-xs text-amber-600 dark:text-amber-400 block" title={log.error_message}>
+                              告警：{log.error_message}
+                            </span>
+                          )}
+                        </div>
                       ) : log.error_message ? (
-                        <span className="text-xs text-red-500 truncate block" title={log.error_message}>
-                          {log.error_message}
+                        <span className={`text-xs truncate block ${log.status === 'success' ? 'text-amber-600 dark:text-amber-400' : 'text-red-500'}`} title={log.error_message}>
+                          {log.status === 'success' ? `告警：${log.error_message}` : log.error_message}
                         </span>
                       ) : (
                         <span className="text-slate-400">-</span>

@@ -15,16 +15,21 @@ from app.api.routes.cards import BatchBindRequest
 from app.api.routes.product_publish import (
     BatchPublishRequest,
     ExternalMaterialUpsertRequest,
+    MaterialCreateRequest,
+    ShopBatchPublishRequest,
 )
 from app.services.product_publish_service import (
     ProductMaterialService,
     _comparable_material_titles,
+    validate_shop_material_config,
 )
 from app.services.account_service import AccountService
 from common.models.user import UserStatus
 from common.services.card_delivery_content import _build_api_params
 from common.services.card_matcher import CardMatcher
 from common.services.item_service import ItemService
+from common.services.shop_fans_price_service import build_fans_price_payload
+from common.services.shop_xianyu_publisher import ShopXianyuPublisher
 from common.utils.security import (
     decrypt_api_key,
     encrypt_api_key,
@@ -277,6 +282,67 @@ class ExternalRequestValidationTests(unittest.TestCase):
         )
         self.assertIsNone(legacy.request_id)
 
+    def test_shop_batch_request_accepts_uuid(self):
+        request_id = "00000000-0000-4000-8000-000000000002"
+        request = ShopBatchPublishRequest(
+            account_ids=["account-a"],
+            material_ids=[1],
+            request_id=request_id,
+        )
+        self.assertEqual(request.request_id, UUID(request_id))
+
+    def test_fixed_shop_shipping_requires_fee(self):
+        with self.assertRaises(ValidationError):
+            MaterialCreateRequest(
+                title="测试商品",
+                description="测试描述",
+                price=1,
+                shop_shipping_mode="fixed",
+            )
+
+        material = MaterialCreateRequest(
+            title="测试商品",
+            description="测试描述",
+            price=1,
+            shop_stock=999,
+            shop_shipping_mode="fixed",
+            shop_shipping_fee=5.5,
+            shop_fans_price_all=0.8,
+        )
+        self.assertEqual(material.shop_shipping_fee, 5.5)
+
+    def test_shop_material_config_validates_precision_and_defaults(self):
+        config = validate_shop_material_config({"shop_stock": 999})
+        self.assertIsNone(config["shop_shipping_mode"])
+        self.assertIsNone(config["shop_shipping_fee"])
+
+        with self.assertRaisesRegex(ValueError, "最多保留两位小数"):
+            validate_shop_material_config({"shop_fans_price_all": 1.234})
+
+    def test_shop_fans_price_payload_and_success_url_parser(self):
+        payload = build_fans_price_payload(
+            "123456",
+            {
+                "shop_fans_price_all": 3.4,
+                "shop_fans_price_old": 2.5,
+                "shop_fans_price_bought": None,
+            },
+        )
+        self.assertEqual(payload["itemId"], "123456")
+        self.assertEqual(
+            payload["fansPriceConfig"]["fansPriceList"],
+            [
+                {"fansGroup": "all", "priceString": "3.40"},
+                {"fansGroup": "old", "priceString": "2.50"},
+            ],
+        )
+        self.assertEqual(
+            ShopXianyuPublisher.parse_published_item_id(
+                "https://seller.goofish.com/?site=COMMONPRO#/seller-item/publish/success?itemId=123456"
+            ),
+            "123456",
+        )
+
     def test_second_delivery_prefix_does_not_change_product_name(self):
         self.assertEqual(
             _comparable_material_titles("【秒发】  测试游戏 "),
@@ -398,6 +464,42 @@ class ExternalMaterialDeduplicationTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(results[0]["material_id"], 88)
         self.assertIn("同名", results[0]["reason"])
         self.assertEqual(session.commits, 1)
+
+
+class ShopMaterialUpdateTests(unittest.IsolatedAsyncioTestCase):
+    async def test_explicit_null_clears_shop_fields(self):
+        material = SimpleNamespace(
+            shop_stock=20,
+            shop_shipping_mode="fixed",
+            shop_shipping_fee=5.5,
+            shop_support_pickup=True,
+            shop_fans_price_all=3.0,
+            shop_fans_price_old=2.0,
+            shop_fans_price_bought=1.0,
+        )
+        session = FakeSession(None)
+        service = ProductMaterialService(session)
+        service.get = AsyncMock(return_value=material)
+
+        updated = await service.update(
+            material_id=1,
+            user_id=1,
+            data={
+                "shop_stock": None,
+                "shop_shipping_mode": None,
+                "shop_support_pickup": None,
+                "shop_fans_price_all": None,
+                "shop_fans_price_old": None,
+                "shop_fans_price_bought": None,
+            },
+        )
+
+        self.assertIs(updated, material)
+        self.assertIsNone(material.shop_stock)
+        self.assertIsNone(material.shop_shipping_mode)
+        self.assertIsNone(material.shop_shipping_fee)
+        self.assertIsNone(material.shop_support_pickup)
+        self.assertIsNone(material.shop_fans_price_all)
 
 
 class RestAuthenticationTests(unittest.IsolatedAsyncioTestCase):

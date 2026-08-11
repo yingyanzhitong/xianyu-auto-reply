@@ -9,22 +9,23 @@
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 from urllib.parse import urlparse
 from uuid import UUID
 
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_active_user, get_db_session
-from app.services.product_publish_service import ProductMaterialService
+from app.services.product_publish_service import ProductMaterialService, validate_shop_material_config
 from app.services.publish_batch_status_service import PublishBatchStatusService
 from app.services.publish_execution_service import PublishExecutorService, PublishLogService
+from app.services.shop_publish_execution_service import ShopPublishExecutorService
 from common.models.user import User, UserRole
 from common.schemas.common import ApiResponse
 from common.utils.local_image_upload import ImageUploadError, save_uploaded_image
@@ -53,6 +54,18 @@ class MaterialCreateRequest(BaseModel):
     brand: Optional[str] = Field(None, max_length=100, description="品牌")
     condition: str = Field("全新", description="成色")
     remark: Optional[str] = Field(None, max_length=500, description="备注（内部使用）")
+    shop_stock: Optional[int] = Field(None, ge=1, le=9999, description="鱼小铺库存")
+    shop_shipping_mode: Optional[Literal["free", "distance", "fixed", "no_shipping"]] = Field(None, description="鱼小铺发货方式")
+    shop_shipping_fee: Optional[float] = Field(None, gt=0, le=1000, description="鱼小铺一口价邮费")
+    shop_support_pickup: Optional[bool] = Field(None, description="鱼小铺是否支持自提")
+    shop_fans_price_all: Optional[float] = Field(None, gt=0, description="鱼小铺全部粉丝价")
+    shop_fans_price_old: Optional[float] = Field(None, gt=0, description="鱼小铺老粉价")
+    shop_fans_price_bought: Optional[float] = Field(None, gt=0, description="鱼小铺已购粉价")
+
+    @model_validator(mode="after")
+    def validate_shop_config(self):
+        validate_shop_material_config(self.model_dump())
+        return self
 
 
 class MaterialUpdateRequest(BaseModel):
@@ -69,6 +82,13 @@ class MaterialUpdateRequest(BaseModel):
     brand: Optional[str] = None
     condition: Optional[str] = None
     remark: Optional[str] = None
+    shop_stock: Optional[int] = Field(None, ge=1, le=9999)
+    shop_shipping_mode: Optional[Literal["free", "distance", "fixed", "no_shipping"]] = None
+    shop_shipping_fee: Optional[float] = Field(None, gt=0, le=1000)
+    shop_support_pickup: Optional[bool] = None
+    shop_fans_price_all: Optional[float] = Field(None, gt=0)
+    shop_fans_price_old: Optional[float] = Field(None, gt=0)
+    shop_fans_price_bought: Optional[float] = Field(None, gt=0)
 
 
 class PublishSingleRequest(BaseModel):
@@ -89,6 +109,13 @@ class PublishSingleRequest(BaseModel):
 
 class BatchPublishRequest(BaseModel):
     """批量发布请求"""
+    account_ids: List[str] = Field(..., min_length=1, description="账号ID列表")
+    material_ids: List[int] = Field(..., min_length=1, description="素材ID列表")
+    request_id: Optional[UUID] = Field(None, description="可选的客户端幂等请求ID")
+
+
+class ShopBatchPublishRequest(BaseModel):
+    """鱼小铺批量发布请求。"""
     account_ids: List[str] = Field(..., min_length=1, description="账号ID列表")
     material_ids: List[int] = Field(..., min_length=1, description="素材ID列表")
     request_id: Optional[UUID] = Field(None, description="可选的客户端幂等请求ID")
@@ -141,7 +168,10 @@ async def create_material(
 ) -> Dict[str, Any]:
     """创建商品素材"""
     svc = ProductMaterialService(session)
-    material = await svc.create(current_user.id, req.model_dump())
+    try:
+        material = await svc.create(current_user.id, req.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
     return ApiResponse(success=True, message="素材创建成功", data={"id": material.id})
 
 
@@ -239,11 +269,14 @@ async def update_material(
     """更新素材信息（管理员可修改任意素材）"""
     svc = ProductMaterialService(session)
     query_user_id = None if _is_admin(current_user) else current_user.id
-    updated = await svc.update(
-        material_id,
-        query_user_id,
-        {k: v for k, v in req.model_dump().items() if v is not None},
-    )
+    try:
+        updated = await svc.update(
+            material_id,
+            query_user_id,
+            req.model_dump(exclude_unset=True),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
     if not updated:
         return ApiResponse(success=False, message="素材不存在或无权修改")
     return ApiResponse(success=True, message="素材更新成功")
@@ -553,6 +586,188 @@ async def get_batch_status(
     )
 
 
+@router.post("/publish/shop/batch", response_model=ApiResponse)
+async def publish_shop_batch(
+    req: ShopBatchPublishRequest,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> Dict[str, Any]:
+    """提交鱼小铺独立批量发布任务。"""
+    from common.models.shop_publish_batch import ShopPublishBatch
+    from common.models.xy_account import XYAccount
+
+    account_ids = list(dict.fromkeys(account_id.strip() for account_id in req.account_ids if account_id.strip()))
+    material_ids = list(dict.fromkeys(req.material_ids))
+    if not account_ids or not material_ids:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="账号和素材不能为空")
+
+    account_rows = (
+        await session.execute(
+            select(XYAccount.account_id).where(
+                XYAccount.owner_id == current_user.id,
+                XYAccount.account_id.in_(account_ids),
+            )
+        )
+    ).scalars().all()
+    missing_accounts = [account_id for account_id in account_ids if account_id not in set(account_rows)]
+    if missing_accounts:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"账号不存在或无权使用: {', '.join(missing_accounts)}",
+        )
+
+    request_id = str(req.request_id or uuid.uuid4())
+    existing_batch = (
+        await session.execute(
+            select(ShopPublishBatch).where(
+                ShopPublishBatch.user_id == current_user.id,
+                ShopPublishBatch.request_id == request_id,
+            )
+        )
+    ).scalar_one_or_none()
+    if existing_batch:
+        return ApiResponse(
+            success=True,
+            message="该鱼小铺请求已提交，返回原批次",
+            data={
+                "batch_id": existing_batch.batch_id,
+                "total": existing_batch.total,
+                "idempotent_replay": True,
+            },
+        )
+
+    mat_svc = ProductMaterialService(session)
+    from app.services.product_publish_service import _material_to_dict
+    materials = [_material_to_dict(m) for m in await mat_svc.list_by_ids(material_ids, current_user.id)]
+    if len(materials) != len(material_ids):
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="包含不存在或无权使用的素材")
+
+    batch_id = request_id
+    batch = ShopPublishBatch(
+        batch_id=batch_id,
+        user_id=current_user.id,
+        request_id=request_id,
+        account_ids=account_ids,
+        material_ids=material_ids,
+        status="queued",
+        total=len(account_ids) * len(materials),
+    )
+    session.add(batch)
+    try:
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        existing_batch = (
+            await session.execute(
+                select(ShopPublishBatch).where(
+                    ShopPublishBatch.user_id == current_user.id,
+                    ShopPublishBatch.request_id == request_id,
+                )
+            )
+        ).scalar_one()
+        return ApiResponse(
+            success=True,
+            message="该鱼小铺请求已提交，返回原批次",
+            data={
+                "batch_id": existing_batch.batch_id,
+                "total": existing_batch.total,
+                "idempotent_replay": True,
+            },
+        )
+
+    background_tasks.add_task(
+        _run_shop_batch_publish_background,
+        user_id=current_user.id,
+        account_ids=account_ids,
+        materials=materials,
+        batch_id=batch_id,
+    )
+    return ApiResponse(
+        success=True,
+        message=f"鱼小铺批量发布任务已提交，共 {len(account_ids)} 个账号 × {len(materials)} 件商品",
+        data={
+            "batch_id": batch_id,
+            "total": len(account_ids) * len(materials),
+            "idempotent_replay": False,
+        },
+    )
+
+
+@router.get("/publish/shop/batch/{batch_id}/status", response_model=ApiResponse)
+async def get_shop_batch_status(
+    batch_id: str,
+    current_user: User = Depends(get_current_active_user),
+    session: AsyncSession = Depends(get_db_session),
+) -> Dict[str, Any]:
+    """查询鱼小铺独立批量发布进度与粉丝价告警。"""
+    from common.models.publish_log import PublishLog
+    from common.models.shop_publish_batch import ShopPublishBatch
+
+    batch = (
+        await session.execute(
+            select(ShopPublishBatch).where(
+                ShopPublishBatch.batch_id == batch_id,
+                ShopPublishBatch.user_id == current_user.id,
+            )
+        )
+    ).scalar_one_or_none()
+    if batch is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="鱼小铺批量任务不存在")
+
+    log_rows = (
+        await session.execute(
+            select(PublishLog)
+            .where(
+                PublishLog.batch_id == batch_id,
+                PublishLog.user_id == current_user.id,
+            )
+            .order_by(PublishLog.id)
+        )
+    ).scalars().all()
+    success = sum(1 for row in log_rows if row.status == "success")
+    failed = sum(1 for row in log_rows if row.status == "failed")
+    publishing = sum(1 for row in log_rows if row.status == "publishing")
+    warning_count = sum(
+        1 for row in log_rows if row.status == "success" and bool(row.error_message)
+    )
+    total = int(batch.total)
+    pending = max(total - success - failed - publishing, 0)
+    finished = batch.status in {"completed", "failed"}
+    if finished:
+        pending = 0
+
+    return ApiResponse(
+        success=True,
+        message="查询成功",
+        data={
+            "batch_id": batch_id,
+            "total": total,
+            "success": success,
+            "failed": failed,
+            "warning_count": warning_count,
+            "publishing": publishing,
+            "pending": pending,
+            "status": batch.status,
+            "finished": finished,
+            "done": finished,
+            "items": [
+                {
+                    "log_id": row.id,
+                    "account_id": row.account_id,
+                    "material_id": row.material_id,
+                    "status": row.status,
+                    "item_id": row.item_id,
+                    "item_url": row.item_url,
+                    "warning_message": row.error_message if row.status == "success" else None,
+                    "error_message": row.error_message if row.status != "success" else None,
+                }
+                for row in log_rows
+            ],
+        },
+    )
+
+
 # ==================== 发布日志接口 ====================
 
 @router.get("/logs", response_model=ApiResponse)
@@ -692,7 +907,6 @@ async def _run_batch_publish_background(
             if batch:
                 batch.status = "running"
                 await session.commit()
-
             # 直接将 batch_id 传给 service，确保日志与路由返回值一致
             result = await svc.batch_publish(
                 user_id=user_id,
@@ -722,5 +936,62 @@ async def _run_batch_publish_background(
             if batch:
                 batch.status = "failed"
                 batch.error_message = str(e)[:1000]
+                batch.finished_at = get_beijing_now_naive()
+                await session.commit()
+
+
+async def _run_shop_batch_publish_background(
+    user_id: int,
+    account_ids: List[str],
+    materials: List[dict],
+    batch_id: str,
+) -> None:
+    """后台执行鱼小铺独立批量发布任务。"""
+    from common.db.session import async_session_maker
+    from common.models.shop_publish_batch import ShopPublishBatch
+    from loguru import logger
+    import traceback
+
+    async with async_session_maker() as session:
+        svc = ShopPublishExecutorService(session)
+        try:
+            batch = (
+                await session.execute(
+                    select(ShopPublishBatch).where(ShopPublishBatch.batch_id == batch_id)
+                )
+            ).scalar_one_or_none()
+            if batch:
+                batch.status = "running"
+                await session.commit()
+
+            result = await svc.batch_publish(
+                user_id=user_id,
+                account_ids=account_ids,
+                materials=materials,
+                batch_id=batch_id,
+            )
+            batch = (
+                await session.execute(
+                    select(ShopPublishBatch).where(ShopPublishBatch.batch_id == batch_id)
+                )
+            ).scalar_one_or_none()
+            if batch:
+                batch.status = "completed"
+                batch.success_count = int(result.get("success_count") or 0)
+                batch.failed_count = int(result.get("failed_count") or 0)
+                batch.warning_count = int(result.get("warning_count") or 0)
+                batch.finished_at = get_beijing_now_naive()
+                await session.commit()
+        except Exception as exc:  # noqa: BLE001
+            logger.error(f"鱼小铺批量发布后台任务异常: {exc}\n{traceback.format_exc()}")
+            await session.rollback()
+            batch = (
+                await session.execute(
+                    select(ShopPublishBatch).where(ShopPublishBatch.batch_id == batch_id)
+                )
+            ).scalar_one_or_none()
+            if batch:
+                batch.status = "failed"
+                batch.error_message = str(exc)[:1000]
                 batch.finished_at = get_beijing_now_naive()
                 await session.commit()

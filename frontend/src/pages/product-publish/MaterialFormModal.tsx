@@ -7,11 +7,17 @@ import { X, Loader2, Upload, Trash2 } from 'lucide-react'
 import { useUIStore } from '@/store/uiStore'
 import {
   createMaterial, updateMaterial, uploadProductImages,
-  type ProductMaterial, type MaterialCreateParams,
+  type ProductMaterial, type MaterialCreateParams, type ShopShippingMode,
 } from '@/api/productPublish'
 
 const CONDITIONS = ['全新', '99新', '95新', '9成新', '8成新', '7成新以下']
 const CATEGORIES = ['数码家电', '服饰鞋包', '家居日用', '图书音像', '美妆个护', '母婴用品', '运动户外', '食品生鲜', '虚拟商品', '其他']
+const SHOP_SHIPPING_OPTIONS: Array<{ value: ShopShippingMode; label: string }> = [
+  { value: 'free', label: '包邮' },
+  { value: 'distance', label: '按距离计费' },
+  { value: 'fixed', label: '一口价' },
+  { value: 'no_shipping', label: '无需邮寄' },
+]
 
 interface Props {
   initial: ProductMaterial | null
@@ -37,6 +43,13 @@ export function MaterialFormModal({ initial, onClose, onSaved }: Props) {
     brand: initial?.brand ?? '',
     condition: initial?.condition ?? '全新',
     remark: initial?.remark ?? '',
+    shop_stock: initial?.shop_stock ?? undefined,
+    shop_shipping_mode: initial?.shop_shipping_mode ?? undefined,
+    shop_shipping_fee: initial?.shop_shipping_fee ?? undefined,
+    shop_support_pickup: initial?.shop_support_pickup ?? undefined,
+    shop_fans_price_all: initial?.shop_fans_price_all ?? undefined,
+    shop_fans_price_old: initial?.shop_fans_price_old ?? undefined,
+    shop_fans_price_bought: initial?.shop_fans_price_bought ?? undefined,
   })
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +81,13 @@ export function MaterialFormModal({ initial, onClose, onSaved }: Props) {
     if (!form.title.trim()) { addToast({ type: 'warning', message: '请填写商品标题' }); return }
     if (!form.description.trim()) { addToast({ type: 'warning', message: '请填写商品描述' }); return }
     if (!form.price || form.price <= 0) { addToast({ type: 'warning', message: '请填写有效价格' }); return }
+    if (form.shop_shipping_mode === 'fixed' && (!form.shop_shipping_fee || form.shop_shipping_fee <= 0)) {
+      addToast({ type: 'warning', message: '鱼小铺选择一口价时请填写邮费' }); return
+    }
+    const fansPrices = [form.shop_fans_price_all, form.shop_fans_price_old, form.shop_fans_price_bought]
+    if (fansPrices.some(value => value !== undefined && value !== null && (value <= 0 || !Number.isInteger(value * 100)))) {
+      addToast({ type: 'warning', message: '鱼小铺粉丝价必须大于0，且最多两位小数' }); return
+    }
     setSaving(true)
     try {
       if (initial) {
@@ -89,7 +109,7 @@ export function MaterialFormModal({ initial, onClose, onSaved }: Props) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content max-w-2xl">
+      <div className="modal-content max-w-3xl">
         <div className="modal-header">
           <h2 className="modal-title">{initial ? '编辑素材' : '新建素材'}</h2>
           <button className="modal-close" onClick={onClose}><X className="w-5 h-5" /></button>
@@ -154,6 +174,64 @@ export function MaterialFormModal({ initial, onClose, onSaved }: Props) {
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   这里填写的地址仅做素材记录，实际发布时会自动从随机地址库分配宝贝所在地。
                 </p>
+              </div>
+              <div className="sm:col-span-2 rounded-xl border border-amber-200 bg-amber-50/60 dark:border-amber-900/60 dark:bg-amber-950/20 p-4">
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200">鱼小铺设置（选填）</h3>
+                  <p className="mt-1 text-xs text-amber-800/80 dark:text-amber-300/80">仅“鱼小铺批量发布”读取；标准单品发布和批量发布不会使用这些字段。</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="input-group">
+                    <label className="input-label">库存</label>
+                    <input type="number" className="input-ios" placeholder="未填发布时使用 999" min="1" max="9999" step="1"
+                      value={form.shop_stock ?? ''}
+                      onChange={e => setForm(f => ({ ...f, shop_stock: e.target.value ? Number(e.target.value) : null }))} />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">发货设置</label>
+                    <select className="input-ios" value={form.shop_shipping_mode ?? ''}
+                      onChange={e => setForm(f => ({
+                        ...f,
+                        shop_shipping_mode: (e.target.value || null) as ShopShippingMode | null,
+                        shop_shipping_fee: e.target.value === 'fixed' ? f.shop_shipping_fee : null,
+                      }))}>
+                      <option value="">未配置（发布时包邮）</option>
+                      {SHOP_SHIPPING_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    </select>
+                  </div>
+                  {form.shop_shipping_mode === 'fixed' && (
+                    <div className="input-group">
+                      <label className="input-label">一口价邮费（元）</label>
+                      <input type="number" className="input-ios" placeholder="0.00" min="0.01" max="1000" step="0.01"
+                        value={form.shop_shipping_fee ?? ''}
+                        onChange={e => setForm(f => ({ ...f, shop_shipping_fee: e.target.value ? Number(e.target.value) : null }))} />
+                    </div>
+                  )}
+                  <label className="input-group flex items-center gap-3 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2.5 cursor-pointer">
+                    <input type="checkbox" className="w-4 h-4 accent-amber-500"
+                      checked={form.shop_support_pickup === true}
+                      onChange={e => setForm(f => ({ ...f, shop_support_pickup: e.target.checked }))} />
+                    <span className="text-sm text-slate-700 dark:text-slate-200">支持自提</span>
+                  </label>
+                  <div className="input-group">
+                    <label className="input-label">全部粉丝价（元）</label>
+                    <input type="number" className="input-ios" placeholder="选填" min="0.01" step="0.01"
+                      value={form.shop_fans_price_all ?? ''}
+                      onChange={e => setForm(f => ({ ...f, shop_fans_price_all: e.target.value ? Number(e.target.value) : null }))} />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">老粉价（元）</label>
+                    <input type="number" className="input-ios" placeholder="选填" min="0.01" step="0.01"
+                      value={form.shop_fans_price_old ?? ''}
+                      onChange={e => setForm(f => ({ ...f, shop_fans_price_old: e.target.value ? Number(e.target.value) : null }))} />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">已购粉价（元）</label>
+                    <input type="number" className="input-ios" placeholder="选填" min="0.01" step="0.01"
+                      value={form.shop_fans_price_bought ?? ''}
+                      onChange={e => setForm(f => ({ ...f, shop_fans_price_bought: e.target.value ? Number(e.target.value) : null }))} />
+                  </div>
+                </div>
               </div>
               <div className="sm:col-span-2 input-group">
                 <label className="input-label">商品描述 <span className="text-red-500">*</span></label>

@@ -1269,6 +1269,13 @@ class DatabaseInitializer:
                 brand VARCHAR(100) DEFAULT NULL COMMENT '品牌',
                 `condition` VARCHAR(20) DEFAULT '全新' COMMENT '成色',
                 remark VARCHAR(500) DEFAULT NULL COMMENT '备注（仅内部使用）',
+                shop_stock INT DEFAULT NULL COMMENT '鱼小铺库存',
+                shop_shipping_mode VARCHAR(20) DEFAULT NULL COMMENT '鱼小铺发货方式：free/distance/fixed/no_shipping',
+                shop_shipping_fee DECIMAL(8,2) DEFAULT NULL COMMENT '鱼小铺一口价邮费',
+                shop_support_pickup TINYINT(1) DEFAULT NULL COMMENT '鱼小铺是否支持自提',
+                shop_fans_price_all DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺全部粉丝价',
+                shop_fans_price_old DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺老粉价',
+                shop_fans_price_bought DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺已购粉价',
                 source_type VARCHAR(32) DEFAULT NULL COMMENT '外部素材来源类型',
                 source_item_id VARCHAR(128) DEFAULT NULL COMMENT '外部来源商品ID',
                 source_content_hash VARCHAR(64) DEFAULT NULL COMMENT '外部来源内容哈希',
@@ -1302,6 +1309,30 @@ class DatabaseInitializer:
                 UNIQUE KEY uk_publish_batch_user_request (user_id, request_id),
                 INDEX idx_publish_batch_user_created (user_id, created_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品批量发布任务表';
+        """,
+
+        # 37.2 鱼小铺商品批量发布任务表
+        "xy_shop_publish_batches": """
+            CREATE TABLE IF NOT EXISTS xy_shop_publish_batches (
+                id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+                batch_id VARCHAR(36) NOT NULL COMMENT '服务端批次ID',
+                user_id BIGINT NOT NULL COMMENT '操作用户ID',
+                request_id VARCHAR(36) NOT NULL COMMENT '客户端幂等请求ID',
+                account_ids JSON NOT NULL COMMENT '发布账号ID列表',
+                material_ids JSON NOT NULL COMMENT '素材ID列表',
+                status VARCHAR(20) NOT NULL DEFAULT 'queued' COMMENT 'queued/running/completed/failed',
+                total INT NOT NULL DEFAULT 0,
+                success_count INT NOT NULL DEFAULT 0,
+                failed_count INT NOT NULL DEFAULT 0,
+                warning_count INT NOT NULL DEFAULT 0,
+                error_message VARCHAR(1000) DEFAULT NULL,
+                finished_at DATETIME DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_shop_publish_batch_id (batch_id),
+                UNIQUE KEY uk_shop_publish_batch_user_request (user_id, request_id),
+                INDEX idx_shop_publish_batch_user_created (user_id, created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='鱼小铺商品批量发布任务表';
         """,
 
         # 38.1 定时求小红花执行日志表
@@ -1884,6 +1915,13 @@ class DatabaseInitializer:
             ("expire_at", "DATETIME DEFAULT NULL COMMENT '账号到期日（精确到秒，NULL=永不过期）'", "api_key_last_used_at"),
         ],
         "xy_product_materials": [
+            ("shop_stock", "INT DEFAULT NULL COMMENT '鱼小铺库存'", "remark"),
+            ("shop_shipping_mode", "VARCHAR(20) DEFAULT NULL COMMENT '鱼小铺发货方式：free/distance/fixed/no_shipping'", "shop_stock"),
+            ("shop_shipping_fee", "DECIMAL(8,2) DEFAULT NULL COMMENT '鱼小铺一口价邮费'", "shop_shipping_mode"),
+            ("shop_support_pickup", "TINYINT(1) DEFAULT NULL COMMENT '鱼小铺是否支持自提'", "shop_shipping_fee"),
+            ("shop_fans_price_all", "DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺全部粉丝价'", "shop_support_pickup"),
+            ("shop_fans_price_old", "DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺老粉价'", "shop_fans_price_all"),
+            ("shop_fans_price_bought", "DECIMAL(12,2) DEFAULT NULL COMMENT '鱼小铺已购粉价'", "shop_fans_price_old"),
             ("source_type", "VARCHAR(32) DEFAULT NULL COMMENT '外部素材来源类型'", "remark"),
             ("source_item_id", "VARCHAR(128) DEFAULT NULL COMMENT '外部来源商品ID'", "source_type"),
             ("source_content_hash", "VARCHAR(64) DEFAULT NULL COMMENT '外部来源内容哈希'", "source_item_id"),
