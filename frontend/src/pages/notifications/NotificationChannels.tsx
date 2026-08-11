@@ -106,6 +106,92 @@ const channelTypes = [
 
 type ChannelType = typeof channelTypes[number]['type']
 
+type NotificationTemplateType = 'chat' | 'delivery' | 'account'
+
+const templateConfigKeys: Record<NotificationTemplateType, string> = {
+  chat: 'chat_template',
+  delivery: 'delivery_template',
+  account: 'account_template',
+}
+
+const templateVariables: Record<NotificationTemplateType, string[]> = {
+  chat: ['account', 'account_id', 'account_remark', 'buyer_nick', 'buyer_id', 'message', 'item_id', 'chat_id', 'time'],
+  delivery: ['account', 'account_id', 'account_remark', 'buyer_nick', 'buyer_id', 'message', 'item_id', 'chat_id', 'time', 'order_id', 'amount', 'quantity', 'result'],
+  account: ['account', 'account_id', 'account_remark', 'title', 'notification_type', 'detail', 'chat_id', 'verification_url', 'verification_info', 'time'],
+}
+
+const defaultTemplates: Record<NotificationTemplateType, string> = {
+  chat: `【闲鱼消息】
+闲鱼账号: {{account}}
+发送者: {{buyer_nick}}
+买家ID: {{buyer_id}}
+消息: {{message}}
+商品ID: {{item_id}}
+聊天ID: {{chat_id}}
+时间: {{time}}`,
+  delivery: `🚨 自动发货通知
+
+闲鱼账号: {{account}}
+买家昵称: {{buyer_nick}}
+买家ID: {{buyer_id}}
+订单金额: {{amount}}
+购买数量: {{quantity}}
+订单ID: {{order_id}}
+商品ID: {{item_id}}
+聊天ID: {{chat_id}}
+结果: {{result}}
+时间: {{time}}
+
+请及时处理！`,
+  account: `{{title}}
+
+闲鱼账号: {{account}}
+时间: {{time}}
+详情: {{detail}}
+{{verification_info}}`,
+}
+
+const templateDefinitions: Array<{ type: NotificationTemplateType; label: string }> = [
+  { type: 'chat', label: '聊天消息模板' },
+  { type: 'delivery', label: '自动发货模板' },
+  { type: 'account', label: '账号状态模板' },
+]
+
+const getTemplateValidationError = (template: string, templateType: NotificationTemplateType): string | null => {
+  if (!template.trim()) return null
+
+  const placeholderPattern = /{{\s*([A-Za-z_][A-Za-z0-9_]*)\s*}}/g
+  const placeholders = [...template.matchAll(placeholderPattern)]
+  const remaining = template.replace(placeholderPattern, '')
+  if (remaining.includes('{{') || remaining.includes('}}')) {
+    return '占位符必须使用 {{variable}} 格式'
+  }
+
+  const unknownVariables = [...new Set(placeholders.map((match) => match[1]).filter((name) => !templateVariables[templateType].includes(name)))]
+  if (unknownVariables.length > 0) {
+    return `不支持的占位符: ${unknownVariables.join(', ')}`
+  }
+  return null
+}
+
+const splitTemplateConfig = (config?: Record<string, unknown>) => {
+  const templates: Record<NotificationTemplateType, string> = { ...defaultTemplates }
+  const channelConfig: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(config || {})) {
+    const templateType = templateDefinitions.find((definition) => templateConfigKeys[definition.type] === key)?.type
+    if (templateType) {
+      if (typeof value === 'string' && value.trim()) {
+        templates[templateType] = value
+      }
+    } else {
+      channelConfig[key] = value
+    }
+  }
+
+  return { templates, channelConfig }
+}
+
 const channelTypeLabels: Record<string, string> = Object.fromEntries(
   channelTypes.map(c => [c.type, c.label])
 )
@@ -120,6 +206,7 @@ export function NotificationChannels() {
   const [selectedType, setSelectedType] = useState<ChannelType | null>(null)
   const [formName, setFormName] = useState('')
   const [formConfig, setFormConfig] = useState('')
+  const [formTemplates, setFormTemplates] = useState<Record<NotificationTemplateType, string>>({ ...defaultTemplates })
   const [formEnabled, setFormEnabled] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -222,6 +309,7 @@ export function NotificationChannels() {
     } else {
       setFormConfig('')
     }
+    setFormTemplates({ ...defaultTemplates })
     setFormEnabled(true)
     setIsModalOpen(true)
   }
@@ -233,13 +321,15 @@ export function NotificationChannels() {
     setEditingChannel(channel)
     setFormName(channel.name)
     // 编辑时如果配置为空，也填充默认样例
-    if (channel.config && Object.keys(channel.config).length > 0) {
-      setFormConfig(JSON.stringify(channel.config, null, 2))
+    const { templates, channelConfig } = splitTemplateConfig(channel.config)
+    if (Object.keys(channelConfig).length > 0) {
+      setFormConfig(JSON.stringify(channelConfig, null, 2))
     } else if (typeConfig?.defaultConfig) {
       setFormConfig(JSON.stringify(typeConfig.defaultConfig, null, 2))
     } else {
       setFormConfig('')
     }
+    setFormTemplates(templates)
     setFormEnabled(channel.enabled)
     setIsModalOpen(true)
   }
@@ -260,7 +350,7 @@ export function NotificationChannels() {
 
     setSaving(true)
     try {
-      let config = {}
+      let config: Record<string, unknown> = {}
       if (formConfig.trim()) {
         try {
           config = JSON.parse(formConfig)
@@ -268,6 +358,19 @@ export function NotificationChannels() {
           addToast({ type: 'error', message: '配置JSON格式错误' })
           setSaving(false)
           return
+        }
+      }
+
+      for (const definition of templateDefinitions) {
+        delete config[templateConfigKeys[definition.type]]
+        const template = formTemplates[definition.type]
+        const validationError = getTemplateValidationError(template, definition.type)
+        if (validationError) {
+          addToast({ type: 'error', message: `${definition.label}${validationError}` })
+          return
+        }
+        if (template.trim()) {
+          config[templateConfigKeys[definition.type]] = template
         }
       }
 
@@ -451,7 +554,7 @@ export function NotificationChannels() {
       {/* 配置弹窗 */}
       {isModalOpen && selectedType && (
         <div className="modal-overlay">
-          <div className="modal-content max-w-lg">
+          <div className="modal-content max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="modal-header flex items-center justify-between">
               <h2 className="text-lg font-semibold">
                 {editingChannel ? '编辑' : '配置'}{channelTypeLabels[selectedType]}
@@ -483,6 +586,30 @@ export function NotificationChannels() {
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {getConfigHint(selectedType)}
                   </p>
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-4 space-y-4">
+                  <div>
+                    <p className="input-label">通知正文模板</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      支持英文占位符，例如 {'{{buyer_nick}}'}；留空可恢复系统默认正文。
+                    </p>
+                  </div>
+                  {templateDefinitions.map((definition) => (
+                    <div key={definition.type}>
+                      <label className="input-label">{definition.label}</label>
+                      <textarea
+                        value={formTemplates[definition.type]}
+                        onChange={(event) => setFormTemplates((templates) => ({
+                          ...templates,
+                          [definition.type]: event.target.value,
+                        }))}
+                        className="input-ios h-32 resize-y font-mono text-sm"
+                      />
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 break-words">
+                        可用变量：{templateVariables[definition.type].map((name) => `{{${name}}}`).join('、')}
+                      </p>
+                    </div>
+                  ))}
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-200">启用此渠道</span>
