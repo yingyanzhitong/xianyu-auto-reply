@@ -1,0 +1,46 @@
+CHANGELOG.md
+  s_ba72aabed0be2b::t_6fc5c9f284f90d 3-7
+common/db/compat.py
+  s_ba72aabed0be2b::t_ae40a3af30c473 686-687
+common/tests/test_notification_dispatch.py
+  s_ba72aabed0be2b::t_4088b0f112c44e 1-159
+common/tests/test_notification_template.py
+  s_ba72aabed0be2b::t_b6a66a02d7f112 1-72
+common/utils/notification_template.py
+  s_ba72aabed0be2b::t_523370b05bbc1c 1-103
+frontend/package-lock.json
+  s_ba72aabed0be2b::t_80d86962394cf3 3,9
+frontend/package.json
+  s_ba72aabed0be2b::t_58b43874d8ff2a 4
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_ba72aabed0be2b::t_fd22062a339311 109-194,209,312,324-326,332,353,360-369,371-373,557,589-612
+package-lock.json
+  s_ba72aabed0be2b::t_3cb16d8ccf0619 3,9
+package.json
+  s_ba72aabed0be2b::t_e3ae5736281621 3
+websocket/app/services/xianyu/auto_delivery_handler.py
+  s_ba72aabed0be2b::t_7a75422a90ad5b 359-360,365-372,1407,1419,1428,1435-1438,1450,1461,1464-1468,1470-1473,1586-1589,1605-1608
+websocket/app/services/xianyu/auto_reply_service.py
+  s_ba72aabed0be2b::t_7f09288642c151 36,1059-1069,1095-1100,1103,1105,1107,1109,1111,1113,1115,1117
+websocket/app/services/xianyu/notification_manager.py
+  s_ba72aabed0be2b::t_5879a9d0d600a5 14,30,97,136-151,157-159,192-214,218-223,230-249,346-363,419-420,445-450,453,456,459,462,465,468,471,474
+websocket/app/services/xianyu/yifan_api_handler.py
+  s_ba72aabed0be2b::t_a5c05946198ac6 65-74,76,218,220-223,326,328-331
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "1acce522ee0f35b65d4b1e9191d51224435c75d8",
+  "prompts": {},
+  "logical_commit_id": "1acce522ee0f35b65d4b1e9191d51224435c75d8",
+  "sessions": {
+    "s_ba72aabed0be2b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fee98-c7c0-7d23-bfaf-8e8f4d4c284d",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
