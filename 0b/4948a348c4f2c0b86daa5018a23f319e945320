@@ -1,0 +1,20 @@
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_ba72aabed0be2b::t_4c71e612c1bb3e 117-155,205,644
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0b4948a348c4f2c0b86daa5018a23f319e945320",
+  "prompts": {},
+  "logical_commit_id": "0b4948a348c4f2c0b86daa5018a23f319e945320",
+  "sessions": {
+    "s_ba72aabed0be2b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fee98-c7c0-7d23-bfaf-8e8f4d4c284d",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
