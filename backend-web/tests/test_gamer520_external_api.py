@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -30,6 +31,7 @@ from common.services.card_matcher import CardMatcher
 from common.services.item_service import ItemService
 from common.services.shop_fans_price_service import build_fans_price_payload
 from common.services.shop_xianyu_publisher import ShopXianyuPublisher
+from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
 from common.utils.security import (
     decrypt_api_key,
     encrypt_api_key,
@@ -342,6 +344,40 @@ class ExternalRequestValidationTests(unittest.TestCase):
             ),
             "123456",
         )
+
+    def test_shop_quick_entry_page_is_distinguished_from_publish_form(self):
+        self.assertTrue(ShopXianyuPublisher.is_quick_entry_page("手机扫码安全登录\n快速进入"))
+        self.assertFalse(ShopXianyuPublisher.is_quick_entry_page("快速进入\n添加首图"))
+
+    def test_shop_publisher_clicks_quick_entry_then_reopens_publish_page(self):
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            page = SimpleNamespace(
+                evaluate=AsyncMock(return_value="手机扫码安全登录\n快速进入"),
+                goto=AsyncMock(),
+            )
+            quick_entry_button = SimpleNamespace(click=AsyncMock())
+            publisher.page = page
+            publisher._find_visible_text_target = AsyncMock(return_value=quick_entry_button)
+
+            with patch.object(
+                PromotionXianyuPublisher,
+                "_open_publish_page_with_cookie",
+                new=AsyncMock(),
+            ), patch(
+                "common.services.shop_xianyu_publisher.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                await publisher._open_publish_page_with_cookie()
+
+            quick_entry_button.click.assert_awaited_once()
+            page.goto.assert_awaited_once_with(
+                publisher.PROMOTION_PUBLISH_URL,
+                wait_until="domcontentloaded",
+                timeout=60000,
+            )
+
+        asyncio.run(run_test())
 
     def test_second_delivery_prefix_does_not_change_product_name(self):
         self.assertEqual(

@@ -170,6 +170,7 @@ export function ShopBatchPublish() {
   }
 
   const warningItems = progress?.items.filter(item => item.warning_message) ?? []
+  const failureItems = progress?.items.filter(item => item.status === 'failed') ?? []
   const completedCount = progress ? progress.success + progress.failed : 0
 
   return (
@@ -251,6 +252,7 @@ export function ShopBatchPublish() {
           </div>
           {progress.total > 0 && <><div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 mb-1"><div className="bg-amber-500 h-2 rounded-full transition-all duration-500" style={{ width: `${Math.round(completedCount / progress.total * 100)}%` }} /></div><div className="flex justify-between text-xs text-slate-400"><span>进度 {Math.round(completedCount / progress.total * 100)}%</span><span>批次 ID：{progress.batch_id.slice(0, 8)}...</span></div></>}
           {!progress.finished && <p className="text-xs text-slate-400 mt-2">每 3 秒自动刷新进度</p>}
+          {failureItems.length > 0 && <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4"><h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300 mb-2">发布失败详情</h3><div className="space-y-2">{failureItems.map(item => <div key={item.log_id} className="rounded-lg bg-rose-50 dark:bg-rose-950/30 px-3 py-2 text-xs text-rose-800 dark:text-rose-200"><span className="font-medium">{item.account_id}{item.title ? ` · ${item.title}` : ''}</span>：{item.error_message || '未返回失败原因，请到发布日志查看'}</div>)}</div></div>}
           {warningItems.length > 0 && <div className="mt-4 border-t border-slate-200 dark:border-slate-700 pt-4"><h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">发布成功但有告警</h3><div className="space-y-2">{warningItems.map(item => <div key={item.log_id} className="rounded-lg bg-amber-50 dark:bg-amber-950/30 px-3 py-2 text-xs text-amber-800 dark:text-amber-200"><span className="font-medium">{item.account_id}</span>：{item.warning_message}</div>)}</div></div>}
         </div>
       </motion.div>}

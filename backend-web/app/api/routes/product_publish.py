@@ -755,6 +755,7 @@ async def get_shop_batch_status(
                 {
                     "log_id": row.id,
                     "account_id": row.account_id,
+                    "title": row.title,
                     "material_id": row.material_id,
                     "status": row.status,
                     "item_id": row.item_id,

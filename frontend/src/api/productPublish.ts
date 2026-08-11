@@ -159,6 +159,7 @@ export type PublishBatchResponse = ApiResponse<PublishBatchResponseData>
 export interface ShopBatchProgressItem {
   log_id: number
   account_id: string
+  title?: string | null
   material_id?: number | null
   status: 'pending' | 'publishing' | 'success' | 'failed'
   item_id?: string | null

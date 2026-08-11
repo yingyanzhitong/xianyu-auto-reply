@@ -21,6 +21,8 @@ SHOP_SHIPPING_LABELS = {
 class ShopXianyuPublisher(PromotionXianyuPublisher):
     """在 seller.goofish.com 页面发布并填写鱼小铺专属字段。"""
 
+    PUBLISH_FORM_MARKERS = ("添加首图", "宝贝图片")
+
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._shop_item_data: dict[str, Any] = {}
@@ -30,6 +32,40 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
         """解析鱼小铺成功页 hash/query 中的 itemId。"""
         matched = re.search(r"(?:[?&#]|^)(?:itemId|item_id|id)=([0-9]+)", str(url or ""), re.IGNORECASE)
         return matched.group(1) if matched else None
+
+    @classmethod
+    def is_quick_entry_page(cls, page_text: str | None) -> bool:
+        """判断是否停留在鱼小铺首次进入页，而不是实际的发布表单。"""
+        text = str(page_text or "")
+        return "快速进入" in text and not any(marker in text for marker in cls.PUBLISH_FORM_MARKERS)
+
+    async def _open_publish_page_with_cookie(self) -> None:
+        """首次进入鱼小铺时自动通过“快速进入”页后再打开发布表单。"""
+        await super()._open_publish_page_with_cookie()
+        if not self.page:
+            return
+
+        try:
+            page_text = await self.page.evaluate("() => document.body.innerText")
+        except Exception:
+            return
+        if not self.is_quick_entry_page(page_text):
+            return
+
+        logger.info("[鱼小铺] 检测到首次进入页，点击“快速进入”")
+        target = await self._find_visible_text_target("快速进入")
+        if target is None:
+            raise Exception("检测到鱼小铺快速进入页，但未找到“快速进入”按钮")
+        await target.click()
+        await asyncio.sleep(1.5)
+
+        # 快速进入会写入卖家页初始化状态，随后重新打开目标路由，确保落到实际发布表单。
+        await self.page.goto(
+            self.PROMOTION_PUBLISH_URL,
+            wait_until="domcontentloaded",
+            timeout=60000,
+        )
+        await asyncio.sleep(2)
 
     async def publish_item(
         self,
