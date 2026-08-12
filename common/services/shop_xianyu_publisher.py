@@ -97,6 +97,7 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
             fallback_set_item_address=super(PromotionXianyuPublisher, self)._set_item_address,
             address_match_score=_get_shop_address_match_score,
             retry_detached_option_click=True,
+            allow_selected_address_alias=True,
         )
 
     async def _set_free_shipping(self) -> None:

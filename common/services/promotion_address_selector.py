@@ -278,6 +278,7 @@ async def set_promotion_item_address(
     fallback_set_item_address: Callable[[dict], Awaitable[None]],
     address_match_score: Callable[[str, str, str], tuple[int, ...] | None] = _get_promotion_address_match_score,
     retry_detached_option_click: bool = False,
+    allow_selected_address_alias: bool = False,
 ) -> None:
     page = publisher.page
     if not page:
@@ -506,6 +507,9 @@ async def set_promotion_item_address(
         logger.info(f"当前已选择宝贝所在地: {selected_text}")
         if address_match_score(selected_text, expected_text, address) is not None:
             logger.info("✅ 宝贝所在地设置完成")
+            return
+        if allow_selected_address_alias:
+            logger.info("✅ 鱼小铺已选中匹配候选，保留平台展示的地址别名")
             return
 
     raise Exception(f"宝贝所在地设置后校验失败，当前显示: {selected_text or '空'}")

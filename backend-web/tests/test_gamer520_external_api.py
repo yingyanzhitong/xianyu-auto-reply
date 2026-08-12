@@ -413,6 +413,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
                 _get_shop_address_match_score,
             )
             self.assertTrue(set_address.await_args.kwargs["retry_detached_option_click"])
+            self.assertTrue(set_address.await_args.kwargs["allow_selected_address_alias"])
 
         asyncio.run(run_test())
 
