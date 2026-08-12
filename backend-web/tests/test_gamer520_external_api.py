@@ -35,6 +35,7 @@ from common.services.promotion_address_selector import (
     _click_with_detached_retry,
     _get_promotion_address_match_score,
     _get_shop_address_match_score,
+    _matches_selected_address_alias,
 )
 from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
 from common.utils.security import (
@@ -397,6 +398,20 @@ class ExternalRequestValidationTests(unittest.TestCase):
         )
         self.assertIsNone(
             _get_shop_address_match_score("湖州市南浔区", expected_text, address)
+        )
+
+    def test_shop_address_alias_must_belong_to_selected_candidate(self):
+        self.assertTrue(
+            _matches_selected_address_alias(
+                "恒德利大厦",
+                "恒德利大厦\n南村镇恒美大街恒德利大厦",
+            )
+        )
+        self.assertFalse(
+            _matches_selected_address_alias(
+                "恒德利大厦",
+                "建明生活小区\n谈固南大街",
+            )
         )
 
     def test_shop_publisher_uses_its_own_address_matcher(self):

@@ -119,6 +119,15 @@ def _get_shop_address_match_score(
     return best_score
 
 
+def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> bool:
+    """确认鱼小铺回填的地点名属于刚刚点击的候选项。"""
+    selected = _normalize_address_text(selected_text)
+    candidate_label = _normalize_address_text(candidate_text.splitlines()[0] if candidate_text else "")
+    if len(selected) < 2 or len(candidate_label) < 2:
+        return False
+    return selected == candidate_label or selected in candidate_label or candidate_label in selected
+
+
 async def _read_promotion_address_text(container) -> str:
     candidate_selectors = [
         'div[title]',
@@ -508,8 +517,11 @@ async def set_promotion_item_address(
         if address_match_score(selected_text, expected_text, address) is not None:
             logger.info("✅ 宝贝所在地设置完成")
             return
-        if allow_selected_address_alias:
+        if allow_selected_address_alias and _matches_selected_address_alias(selected_text, best_text):
             logger.info("✅ 鱼小铺已选中匹配候选，保留平台展示的地址别名")
             return
 
-    raise Exception(f"宝贝所在地设置后校验失败，当前显示: {selected_text or '空'}")
+    raise Exception(
+        "宝贝所在地设置后校验失败，"
+        f"目标候选: {best_text or '空'}，当前显示: {selected_text or '空'}"
+    )
