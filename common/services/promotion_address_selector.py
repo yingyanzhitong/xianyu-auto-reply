@@ -12,6 +12,85 @@ def _normalize_address_text(value: str) -> str:
     return re.sub(r"\s+", "", str(value or ""))
 
 
+def _get_promotion_address_match_score(
+    option_text: str,
+    expected_text: str,
+    address: str,
+) -> tuple[int, int] | None:
+    """返佣链路的历史候选匹配策略，保持既有行为不变。"""
+    normalized_option = _normalize_address_text(option_text)
+    if not normalized_option:
+        return None
+
+    normalized_expected = _normalize_address_text(expected_text)
+    normalized_address = _normalize_address_text(address)
+    if not any(
+        target in normalized_option or normalized_option in target
+        for target in (normalized_expected, normalized_address)
+        if target
+    ):
+        return None
+
+    match_level = 4
+    if normalized_expected:
+        if normalized_option == normalized_expected:
+            match_level = 0
+        elif normalized_expected in normalized_option:
+            match_level = 1
+    if match_level == 4 and normalized_address:
+        if normalized_option == normalized_address:
+            match_level = 2
+        elif normalized_address in normalized_option:
+            match_level = 3
+    return (match_level, len(option_text))
+
+
+_ADDRESS_COMPONENT_PATTERN = re.compile(
+    r"[^省市区县旗盟地区]+?(?:特别行政区|自治区|自治州|省|市|区|县|旗|盟|地区)"
+)
+_ADDRESS_COMPONENT_SUFFIX_PATTERN = re.compile(
+    r"(?:特别行政区|自治区|自治州|省|市|区|县|旗|盟|地区)$"
+)
+
+
+def _get_shop_address_match_score(
+    option_text: str,
+    expected_text: str,
+    address: str,
+) -> tuple[int, int, int, int] | None:
+    """鱼小铺候选匹配策略，兼容省市区顺序变化或省份省略。"""
+    normalized_option = _normalize_address_text(option_text)
+    if not normalized_option:
+        return None
+
+    best_score = None
+    for target_index, raw_target in enumerate((expected_text, address)):
+        target = _normalize_address_text(raw_target)
+        if not target:
+            continue
+        if normalized_option == target:
+            score = (0, target_index, len(normalized_option), 0)
+        elif target in normalized_option:
+            score = (1, target_index, len(normalized_option), 0)
+        elif len(normalized_option) >= 4 and normalized_option in target:
+            score = (2, target_index, len(normalized_option), 0)
+        else:
+            components = [
+                _ADDRESS_COMPONENT_SUFFIX_PATTERN.sub("", component)
+                for component in _ADDRESS_COMPONENT_PATTERN.findall(target)
+            ]
+            components = list(dict.fromkeys(component for component in components if len(component) >= 2))
+            matched_count = sum(component in normalized_option for component in components)
+            if matched_count < (2 if len(components) >= 2 else 1):
+                continue
+            score = (3, -matched_count, target_index, len(normalized_option))
+
+        if best_score is None or score < best_score:
+            best_score = score
+
+    return best_score
+
+
 async def _read_promotion_address_text(container) -> str:
     candidate_selectors = [
         'div[title]',
@@ -96,6 +175,7 @@ async def set_promotion_item_address(
     publisher: Any,
     item_data: dict,
     fallback_set_item_address: Callable[[dict], Awaitable[None]],
+    address_match_score: Callable[[str, str, str], tuple[int, ...] | None] = _get_promotion_address_match_score,
 ) -> None:
     page = publisher.page
     if not page:
@@ -111,12 +191,6 @@ async def set_promotion_item_address(
     else:
         logger.info(f"\n[步骤13] 📍 设置宝贝所在地，搜索关键词: {address}")
 
-    target_texts: list[str] = []
-    for value in [expected_text, address]:
-        normalized_value = _normalize_address_text(value)
-        if normalized_value and normalized_value not in target_texts:
-            target_texts.append(normalized_value)
-
     trigger, current_text = await _find_promotion_address_entry(page)
     if not trigger:
         logger.warning("⚠️ 返佣页面未识别到卖家页地址入口，回退通用地址逻辑继续尝试")
@@ -124,8 +198,7 @@ async def set_promotion_item_address(
 
     if current_text:
         logger.info(f"当前宝贝所在地: {current_text}")
-        normalized_current_text = _normalize_address_text(current_text)
-        if any(target in normalized_current_text or normalized_current_text in target for target in target_texts):
+        if address_match_score(current_text, expected_text, address) is not None:
             logger.info("✅ 当前宝贝所在地已符合要求，跳过设置")
             return
 
@@ -248,8 +321,7 @@ async def set_promotion_item_address(
     if not search_input:
         _, refreshed_text = await _find_promotion_address_entry(page)
         if refreshed_text:
-            normalized_refreshed_text = _normalize_address_text(refreshed_text)
-            if any(target in normalized_refreshed_text or normalized_refreshed_text in target for target in target_texts):
+            if address_match_score(refreshed_text, expected_text, address) is not None:
                 logger.info("✅ 点击地址入口后已自动匹配到目标地址")
                 return
         raise Exception("未找到宝贝所在地搜索框")
@@ -281,8 +353,6 @@ async def set_promotion_item_address(
     best_option = None
     best_text = ""
     best_score = None
-    normalized_expected = _normalize_address_text(expected_text)
-    normalized_address = _normalize_address_text(address)
 
     for root_name, root in roots:
         for selector in option_selectors:
@@ -303,7 +373,12 @@ async def set_promotion_item_address(
                         continue
                     if len(normalized_option_text) < 2 or len(normalized_option_text) > 80:
                         continue
-                    if not any(target in normalized_option_text or normalized_option_text in target for target in target_texts):
+                    match_score = address_match_score(
+                        option_text,
+                        expected_text,
+                        address,
+                    )
+                    if match_score is None:
                         continue
                     box = await option.bounding_box()
                     if not box or box.get("height", 0) < 18 or box.get("width", 0) < 40:
@@ -318,19 +393,12 @@ async def set_promotion_item_address(
                         if box.get("x", 0) > input_box.get("x", 0) + input_box.get("width", 0) + 360:
                             continue
 
-                    match_level = 4
-                    if normalized_expected:
-                        if normalized_option_text == normalized_expected:
-                            match_level = 0
-                        elif normalized_expected in normalized_option_text:
-                            match_level = 1
-                    if match_level == 4 and normalized_address:
-                        if normalized_option_text == normalized_address:
-                            match_level = 2
-                        elif normalized_address in normalized_option_text:
-                            match_level = 3
-
-                    score = (match_level, len(option_text), box.get("y", 0), box.get("x", 0), 0 if root_name == "地址选择层" else 1)
+                    score = (
+                        *match_score,
+                        box.get("y", 0),
+                        box.get("x", 0),
+                        0 if root_name == "地址选择层" else 1,
+                    )
                     if best_score is None or score < best_score:
                         best_option = option
                         best_text = option_text
@@ -374,8 +442,7 @@ async def set_promotion_item_address(
     _, selected_text = await _find_promotion_address_entry(page)
     if selected_text:
         logger.info(f"当前已选择宝贝所在地: {selected_text}")
-        normalized_selected_text = _normalize_address_text(selected_text)
-        if any(target in normalized_selected_text or normalized_selected_text in target for target in target_texts):
+        if address_match_score(selected_text, expected_text, address) is not None:
             logger.info("✅ 宝贝所在地设置完成")
             return
 

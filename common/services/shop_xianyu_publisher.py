@@ -7,6 +7,10 @@ from typing import Any
 
 from loguru import logger
 
+from common.services.promotion_address_selector import (
+    _get_shop_address_match_score,
+    set_promotion_item_address,
+)
 from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
 
 
@@ -82,6 +86,15 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
             cookie_data=cookie_data,
             reuse_browser=reuse_browser,
             should_close=should_close,
+        )
+
+    async def _set_item_address(self, item_data: dict):
+        """沿用卖家页的元素定位，但采用标准发布一致的地址候选匹配语义。"""
+        return await set_promotion_item_address(
+            publisher=self,
+            item_data=item_data,
+            fallback_set_item_address=super(PromotionXianyuPublisher, self)._set_item_address,
+            address_match_score=_get_shop_address_match_score,
         )
 
     async def _set_free_shipping(self) -> None:

@@ -31,6 +31,10 @@ from common.services.card_matcher import CardMatcher
 from common.services.item_service import ItemService
 from common.services.shop_fans_price_service import build_fans_price_payload
 from common.services.shop_xianyu_publisher import ShopXianyuPublisher
+from common.services.promotion_address_selector import (
+    _get_promotion_address_match_score,
+    _get_shop_address_match_score,
+)
 from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
 from common.utils.security import (
     decrypt_api_key,
@@ -348,6 +352,38 @@ class ExternalRequestValidationTests(unittest.TestCase):
     def test_shop_quick_entry_page_is_distinguished_from_publish_form(self):
         self.assertTrue(ShopXianyuPublisher.is_quick_entry_page("手机扫码安全登录\n快速进入"))
         self.assertFalse(ShopXianyuPublisher.is_quick_entry_page("快速进入\n添加首图"))
+
+    def test_shop_address_candidate_accepts_city_district_and_reordered_text(self):
+        expected_text = ""
+        address = "浙江省嘉兴市南湖区"
+        self.assertIsNone(
+            _get_promotion_address_match_score("南湖区 嘉兴市 浙江省", expected_text, address)
+        )
+        self.assertIsNotNone(
+            _get_shop_address_match_score("嘉兴市南湖区", expected_text, address)
+        )
+        self.assertIsNotNone(
+            _get_shop_address_match_score("南湖区 嘉兴市 浙江省", expected_text, address)
+        )
+        self.assertIsNone(
+            _get_shop_address_match_score("湖州市南浔区", expected_text, address)
+        )
+
+    def test_shop_publisher_uses_its_own_address_matcher(self):
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            with patch(
+                "common.services.shop_xianyu_publisher.set_promotion_item_address",
+                new=AsyncMock(),
+            ) as set_address:
+                await publisher._set_item_address({"address": "浙江省嘉兴市南湖区"})
+
+            self.assertIs(
+                set_address.await_args.kwargs["address_match_score"],
+                _get_shop_address_match_score,
+            )
+
+        asyncio.run(run_test())
 
     def test_shop_publisher_clicks_quick_entry_then_reopens_publish_page(self):
         async def run_test():
