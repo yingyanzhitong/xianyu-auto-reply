@@ -26,7 +26,7 @@ SHOP_SHIPPING_LABELS = {
 class ShopXianyuPublisher(PromotionXianyuPublisher):
     """在 seller.goofish.com 页面发布并填写鱼小铺专属字段。"""
 
-    PUBLISH_FORM_MARKERS = ("添加首图", "宝贝图片")
+    PUBLISH_FORM_MARKERS = ("添加首图", "宝贝图片", "宝贝描述", "商品规格", "发货设置")
 
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
@@ -43,6 +43,12 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
         """判断是否停留在鱼小铺首次进入页，而不是实际的发布表单。"""
         text = str(page_text or "")
         return "快速进入" in text and not any(marker in text for marker in cls.PUBLISH_FORM_MARKERS)
+
+    @classmethod
+    def is_publish_form_ready(cls, page_text: str | None) -> bool:
+        """识别鱼小铺当前版本的发布表单，不将有效 Cookie 误判为失效。"""
+        text = str(page_text or "")
+        return any(marker in text for marker in cls.PUBLISH_FORM_MARKERS)
 
     async def _open_publish_page_with_cookie(self) -> None:
         """首次进入鱼小铺时自动通过“快速进入”页后再打开发布表单。"""

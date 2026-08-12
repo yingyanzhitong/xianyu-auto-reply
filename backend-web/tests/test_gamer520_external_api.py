@@ -385,6 +385,13 @@ class ExternalRequestValidationTests(unittest.TestCase):
         self.assertTrue(ShopXianyuPublisher.is_quick_entry_page("手机扫码安全登录\n快速进入"))
         self.assertFalse(ShopXianyuPublisher.is_quick_entry_page("快速进入\n添加首图"))
 
+    def test_shop_publisher_recognizes_current_seller_form_markers(self):
+        current_form_text = "添加视频\n宝贝描述\n商品规格\n价格\n发货设置"
+
+        self.assertFalse(PromotionXianyuPublisher.is_publish_form_ready(current_form_text))
+        self.assertTrue(ShopXianyuPublisher.is_publish_form_ready(current_form_text))
+        self.assertFalse(ShopXianyuPublisher.is_publish_form_ready("手机扫码安全登录\n快速进入"))
+
     def test_shop_address_candidate_accepts_city_district_and_reordered_text(self):
         expected_text = ""
         address = "浙江省嘉兴市南湖区"
