@@ -136,6 +136,7 @@ async def _click_shop_address_option(
     expected_text: str,
     address: str,
     address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
+    refresh_option: Callable[[], Awaitable[Any]] | None = None,
 ) -> None:
     """依次点击鱼小铺候选及其可点击父容器，直到地点实际回填。"""
     targets = [option]
@@ -153,6 +154,7 @@ async def _click_shop_address_option(
         except Exception:
             break
 
+    has_detached_target = False
     for target in targets:
         try:
             if not await target.is_enabled():
@@ -163,7 +165,10 @@ async def _click_shop_address_option(
         try:
             await target.click()
         except Exception as exc:
-            if _is_detached_element_error(exc) or "element is not enabled" in str(exc).lower():
+            if _is_detached_element_error(exc):
+                has_detached_target = True
+                continue
+            if "element is not enabled" in str(exc).lower():
                 continue
             raise
 
@@ -174,6 +179,19 @@ async def _click_shop_address_option(
         if _matches_selected_address_alias(selected_text, option_text):
             logger.info("✅ 鱼小铺地址候选已通过可点击容器回填")
             return
+
+    if has_detached_target and refresh_option:
+        refreshed_option = await refresh_option()
+        if refreshed_option is not None and refreshed_option is not option:
+            logger.info("ℹ️ 鱼小铺地址候选在点击时已刷新，重新定位可用容器")
+            return await _click_shop_address_option(
+                page=page,
+                option=refreshed_option,
+                option_text=option_text,
+                expected_text=expected_text,
+                address=address,
+                address_match_score=address_match_score,
+            )
 
     _, selected_text = await _find_promotion_address_entry(page)
     raise Exception(
@@ -530,7 +548,18 @@ async def set_promotion_item_address(
         )
         return refreshed_option
 
-    if retry_detached_option_click:
+    if retry_unapplied_option_click:
+        # 鱼小铺候选的文本子节点可能不可用，首次点击也必须从可用容器开始。
+        await _click_shop_address_option(
+            page=page,
+            option=best_option,
+            option_text=best_text,
+            expected_text=expected_text,
+            address=address,
+            address_match_score=address_match_score,
+            refresh_option=refresh_best_option if retry_detached_option_click else None,
+        )
+    elif retry_detached_option_click:
         await _click_with_detached_retry(
             target=best_option,
             refresh_target=refresh_best_option,
@@ -538,21 +567,6 @@ async def set_promotion_item_address(
         )
     else:
         await best_option.click()
-
-    if retry_unapplied_option_click:
-        _, selected_text = await _find_promotion_address_entry(page)
-        if (
-            address_match_score(selected_text, expected_text, address) is None
-            and not _matches_selected_address_alias(selected_text, best_text)
-        ):
-            await _click_shop_address_option(
-                page=page,
-                option=best_option,
-                option_text=best_text,
-                expected_text=expected_text,
-                address=address,
-                address_match_score=address_match_score,
-            )
     await asyncio.sleep(1)
 
     confirm_selectors = [
