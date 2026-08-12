@@ -155,9 +155,15 @@ async def _click_shop_address_option(
 
     for target in targets:
         try:
+            if not await target.is_enabled():
+                continue
+        except Exception:
+            pass
+
+        try:
             await target.click()
         except Exception as exc:
-            if _is_detached_element_error(exc):
+            if _is_detached_element_error(exc) or "element is not enabled" in str(exc).lower():
                 continue
             raise
 

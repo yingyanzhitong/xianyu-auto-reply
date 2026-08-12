@@ -417,16 +417,24 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
     def test_shop_address_retries_click_on_candidate_parent_until_address_updates(self):
         async def run_test():
-            parent = SimpleNamespace(click=AsyncMock(), is_visible=AsyncMock(return_value=True))
+            parent = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+            )
             parent.bounding_box = AsyncMock(return_value={"width": 280, "height": 48})
             parent.query_selector = AsyncMock(return_value=None)
-            child = SimpleNamespace(click=AsyncMock(), is_visible=AsyncMock(return_value=True))
+            child = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=False),
+                is_visible=AsyncMock(return_value=True),
+            )
             child.bounding_box = AsyncMock(return_value={"width": 180, "height": 24})
             child.query_selector = AsyncMock(return_value=parent)
 
             with patch(
                 "common.services.promotion_address_selector._find_promotion_address_entry",
-                new=AsyncMock(side_effect=[(None, "恒德利大厦"), (None, "金湖礼宴酒店")]),
+                new=AsyncMock(return_value=(None, "金湖礼宴酒店")),
             ):
                 await _click_shop_address_option(
                     page=SimpleNamespace(),
@@ -437,7 +445,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
                     address_match_score=_get_shop_address_match_score,
                 )
 
-            child.click.assert_awaited_once_with()
+            child.click.assert_not_called()
             parent.click.assert_awaited_once_with()
 
         asyncio.run(run_test())
