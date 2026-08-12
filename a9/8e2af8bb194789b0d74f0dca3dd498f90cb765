@@ -1,0 +1,30 @@
+CHANGELOG.md
+  s_9848638a476476::t_ae2e76ce9b3c82 3-7
+common/services/promotion_address_selector.py
+  s_9848638a476476::t_7e720f67b6be87 139,157,168-169,171-172,182-194,551-562
+frontend/package-lock.json
+  s_9848638a476476::t_07df78e6187890 3,9
+frontend/package.json
+  s_9848638a476476::t_2eac45b27bf455 4
+package-lock.json
+  s_9848638a476476::t_bc5d59b3f87951 3,9
+package.json
+  s_9848638a476476::t_2f6594f190e269 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a98e2af8bb194789b0d74f0dca3dd498f90cb765",
+  "prompts": {},
+  "logical_commit_id": "a98e2af8bb194789b0d74f0dca3dd498f90cb765",
+  "sessions": {
+    "s_9848638a476476": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fef74-fafc-7c31-8a53-8788fb235824",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
