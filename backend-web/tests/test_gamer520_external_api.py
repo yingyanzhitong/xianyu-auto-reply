@@ -457,6 +457,40 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_address_skips_hidden_candidate_before_clicking_parent(self):
+        async def run_test():
+            parent = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+            )
+            parent.bounding_box = AsyncMock(return_value={"width": 280, "height": 48})
+            parent.query_selector = AsyncMock(return_value=None)
+            child = SimpleNamespace(
+                click=AsyncMock(side_effect=Exception("ElementHandle.click: Element is not visible")),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+            )
+            child.bounding_box = AsyncMock(return_value={"width": 180, "height": 24})
+            child.query_selector = AsyncMock(return_value=parent)
+
+            with patch(
+                "common.services.promotion_address_selector._find_promotion_address_entry",
+                new=AsyncMock(return_value=(None, "金湖礼宴酒店")),
+            ):
+                await _click_shop_address_option(
+                    page=SimpleNamespace(),
+                    option=child,
+                    option_text="金湖礼宴酒店\n永安大街289号",
+                    expected_text="",
+                    address="金湖礼宴酒店",
+                    address_match_score=_get_shop_address_match_score,
+                )
+
+            parent.click.assert_awaited_once_with()
+
+        asyncio.run(run_test())
+
     def test_shop_publisher_uses_its_own_address_matcher(self):
         async def run_test():
             publisher = ShopXianyuPublisher()

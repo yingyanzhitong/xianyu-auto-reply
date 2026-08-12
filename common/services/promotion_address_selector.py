@@ -18,6 +18,16 @@ def _is_detached_element_error(error: Exception) -> bool:
     return "not attached to the dom" in message or "element is not attached" in message
 
 
+def _is_unavailable_element_error(error: Exception) -> bool:
+    """判断动态候选在点击时已失效、隐藏或不可用。"""
+    message = str(error).lower()
+    return (
+        _is_detached_element_error(error)
+        or "element is not visible" in message
+        or "element is not enabled" in message
+    )
+
+
 async def _click_with_detached_retry(
     target: Any,
     refresh_target: Callable[[], Awaitable[Any]],
@@ -168,7 +178,7 @@ async def _click_shop_address_option(
             if _is_detached_element_error(exc):
                 has_detached_target = True
                 continue
-            if "element is not enabled" in str(exc).lower():
+            if _is_unavailable_element_error(exc):
                 continue
             raise
 
@@ -186,7 +196,7 @@ async def _click_shop_address_option(
             if _is_detached_element_error(exc):
                 has_detached_target = True
                 continue
-            if "element is not enabled" in str(exc).lower():
+            if _is_unavailable_element_error(exc):
                 continue
             raise
 
