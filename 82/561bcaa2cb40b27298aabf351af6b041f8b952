@@ -1,0 +1,32 @@
+backend-web/tests/test_gamer520_external_api.py
+  s_9848638a476476::t_3c71460c2c78b4 34-37,355-386
+common/services/promotion_address_selector.py
+  s_9848638a476476::t_b876b86b32a27f 15-93,178,201,324,376-381,396-401,445
+common/services/shop_xianyu_publisher.py
+  s_9848638a476476::t_005aeb34918a47 10-13,89-97
+frontend/package-lock.json
+  s_9848638a476476::t_6c8c6fe58199b1 3,9
+frontend/package.json
+  s_9848638a476476::t_3beb1461e76e42 4
+package-lock.json
+  s_9848638a476476::t_6eed57485a04f6 3,9
+package.json
+  s_9848638a476476::t_6b290522335928 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "82561bcaa2cb40b27298aabf351af6b041f8b952",
+  "prompts": {},
+  "logical_commit_id": "82561bcaa2cb40b27298aabf351af6b041f8b952",
+  "sessions": {
+    "s_9848638a476476": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fef74-fafc-7c31-8a53-8788fb235824",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
