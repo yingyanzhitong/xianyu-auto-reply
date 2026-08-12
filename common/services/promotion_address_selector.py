@@ -128,6 +128,54 @@ def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> 
     return selected == candidate_label or selected in candidate_label or candidate_label in selected
 
 
+async def _click_shop_address_option(
+    *,
+    page: Any,
+    option: Any,
+    option_text: str,
+    expected_text: str,
+    address: str,
+    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
+) -> None:
+    """依次点击鱼小铺候选及其可点击父容器，直到地点实际回填。"""
+    targets = [option]
+    current = option
+    for _ in range(3):
+        try:
+            parent = await current.query_selector("xpath=..")
+            if not parent or not await parent.is_visible():
+                break
+            box = await parent.bounding_box()
+            if not box or box.get("height", 0) > 180 or box.get("width", 0) > 600:
+                break
+            targets.append(parent)
+            current = parent
+        except Exception:
+            break
+
+    for target in targets:
+        try:
+            await target.click()
+        except Exception as exc:
+            if _is_detached_element_error(exc):
+                continue
+            raise
+
+        await asyncio.sleep(0.8)
+        _, selected_text = await _find_promotion_address_entry(page)
+        if address_match_score(selected_text, expected_text, address) is not None:
+            return
+        if _matches_selected_address_alias(selected_text, option_text):
+            logger.info("✅ 鱼小铺地址候选已通过可点击容器回填")
+            return
+
+    _, selected_text = await _find_promotion_address_entry(page)
+    raise Exception(
+        "宝贝所在地候选点击未生效，"
+        f"目标候选: {option_text or '空'}，当前显示: {selected_text or '空'}"
+    )
+
+
 async def _read_promotion_address_text(container) -> str:
     candidate_selectors = [
         'div[title]',
@@ -288,6 +336,7 @@ async def set_promotion_item_address(
     address_match_score: Callable[[str, str, str], tuple[int, ...] | None] = _get_promotion_address_match_score,
     retry_detached_option_click: bool = False,
     allow_selected_address_alias: bool = False,
+    retry_unapplied_option_click: bool = False,
 ) -> None:
     page = publisher.page
     if not page:
@@ -483,6 +532,21 @@ async def set_promotion_item_address(
         )
     else:
         await best_option.click()
+
+    if retry_unapplied_option_click:
+        _, selected_text = await _find_promotion_address_entry(page)
+        if (
+            address_match_score(selected_text, expected_text, address) is None
+            and not _matches_selected_address_alias(selected_text, best_text)
+        ):
+            await _click_shop_address_option(
+                page=page,
+                option=best_option,
+                option_text=best_text,
+                expected_text=expected_text,
+                address=address,
+                address_match_score=address_match_score,
+            )
     await asyncio.sleep(1)
 
     confirm_selectors = [

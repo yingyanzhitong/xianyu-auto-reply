@@ -98,6 +98,7 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
             address_match_score=_get_shop_address_match_score,
             retry_detached_option_click=True,
             allow_selected_address_alias=True,
+            retry_unapplied_option_click=True,
         )
 
     async def _set_free_shipping(self) -> None:

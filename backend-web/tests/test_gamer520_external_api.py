@@ -32,6 +32,7 @@ from common.services.item_service import ItemService
 from common.services.shop_fans_price_service import build_fans_price_payload
 from common.services.shop_xianyu_publisher import ShopXianyuPublisher
 from common.services.promotion_address_selector import (
+    _click_shop_address_option,
     _click_with_detached_retry,
     _get_promotion_address_match_score,
     _get_shop_address_match_score,
@@ -414,6 +415,33 @@ class ExternalRequestValidationTests(unittest.TestCase):
             )
         )
 
+    def test_shop_address_retries_click_on_candidate_parent_until_address_updates(self):
+        async def run_test():
+            parent = SimpleNamespace(click=AsyncMock(), is_visible=AsyncMock(return_value=True))
+            parent.bounding_box = AsyncMock(return_value={"width": 280, "height": 48})
+            parent.query_selector = AsyncMock(return_value=None)
+            child = SimpleNamespace(click=AsyncMock(), is_visible=AsyncMock(return_value=True))
+            child.bounding_box = AsyncMock(return_value={"width": 180, "height": 24})
+            child.query_selector = AsyncMock(return_value=parent)
+
+            with patch(
+                "common.services.promotion_address_selector._find_promotion_address_entry",
+                new=AsyncMock(side_effect=[(None, "恒德利大厦"), (None, "金湖礼宴酒店")]),
+            ):
+                await _click_shop_address_option(
+                    page=SimpleNamespace(),
+                    option=child,
+                    option_text="金湖礼宴酒店\n永安大街289号",
+                    expected_text="",
+                    address="金湖礼宴酒店",
+                    address_match_score=_get_shop_address_match_score,
+                )
+
+            child.click.assert_awaited_once_with()
+            parent.click.assert_awaited_once_with()
+
+        asyncio.run(run_test())
+
     def test_shop_publisher_uses_its_own_address_matcher(self):
         async def run_test():
             publisher = ShopXianyuPublisher()
@@ -429,6 +457,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
             )
             self.assertTrue(set_address.await_args.kwargs["retry_detached_option_click"])
             self.assertTrue(set_address.await_args.kwargs["allow_selected_address_alias"])
+            self.assertTrue(set_address.await_args.kwargs["retry_unapplied_option_click"])
 
         asyncio.run(run_test())
 
