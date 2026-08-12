@@ -9,6 +9,7 @@ from loguru import logger
 
 from common.services.promotion_address_selector import (
     _get_shop_address_match_score,
+    _is_detached_element_error,
     set_promotion_item_address,
 )
 from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
@@ -180,6 +181,28 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
         await target.click()
         await asyncio.sleep(0.3)
         logger.info("[鱼小铺] 已开启支持自提")
+
+    async def _click_publish_target(self, publish_btn, publish_btn_selector: str | None) -> None:
+        """鱼小铺直接点击已验证按钮；刷新时仅重新查询同一选择器一次。"""
+        if publish_btn is None:
+            raise Exception("未找到鱼小铺发布按钮")
+
+        try:
+            await publish_btn.click(timeout=5000)
+            return
+        except Exception as error:
+            if not _is_detached_element_error(error) or not self.page or not publish_btn_selector:
+                raise
+
+            logger.info("ℹ️ 鱼小铺发布按钮在点击前已刷新，重新定位后重试")
+            refreshed_btn = await self.page.wait_for_selector(
+                publish_btn_selector,
+                state="visible",
+                timeout=5000,
+            )
+            if refreshed_btn is None or not await refreshed_btn.is_enabled():
+                raise Exception("鱼小铺发布按钮刷新后不可用") from error
+            await refreshed_btn.click(timeout=5000)
 
     async def _click_publish_button(self, result: dict) -> None:
         """兼容 seller.goofish 成功页使用 itemId 而不是 id 参数。"""

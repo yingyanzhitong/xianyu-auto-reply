@@ -446,6 +446,45 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_publisher_clicks_verified_publish_handle_without_locator(self):
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            publish_button = SimpleNamespace(click=AsyncMock())
+            publisher.page = SimpleNamespace(locator=AsyncMock())
+
+            await publisher._click_publish_target(publish_button, 'button:has-text("发布")')
+
+            publish_button.click.assert_awaited_once_with(timeout=5000)
+            publisher.page.locator.assert_not_called()
+
+        asyncio.run(run_test())
+
+    def test_shop_publisher_relocates_detached_publish_button_once(self):
+        class DetachedButton:
+            async def click(self, **_kwargs):
+                raise Exception("ElementHandle.click: Element is not attached to the DOM")
+
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            refreshed_button = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+            )
+            publisher.page = SimpleNamespace(
+                wait_for_selector=AsyncMock(return_value=refreshed_button),
+            )
+
+            await publisher._click_publish_target(DetachedButton(), "button.publish")
+
+            publisher.page.wait_for_selector.assert_awaited_once_with(
+                "button.publish",
+                state="visible",
+                timeout=5000,
+            )
+            refreshed_button.click.assert_awaited_once_with(timeout=5000)
+
+        asyncio.run(run_test())
+
     def test_second_delivery_prefix_does_not_change_product_name(self):
         self.assertEqual(
             _comparable_material_titles("【秒发】  测试游戏 "),
