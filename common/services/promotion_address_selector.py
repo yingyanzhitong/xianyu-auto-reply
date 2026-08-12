@@ -12,6 +12,34 @@ def _normalize_address_text(value: str) -> str:
     return re.sub(r"\s+", "", str(value or ""))
 
 
+def _is_detached_element_error(error: Exception) -> bool:
+    """判断 Playwright 元素句柄是否因页面重绘而失效。"""
+    message = str(error).lower()
+    return "not attached to the dom" in message or "element is not attached" in message
+
+
+async def _click_with_detached_retry(
+    target: Any,
+    refresh_target: Callable[[], Awaitable[Any]],
+    target_name: str,
+) -> None:
+    """点击动态列表元素；页面重绘导致句柄失效时重新定位一次后重试。"""
+    current_target = target
+    for attempt in range(2):
+        try:
+            await current_target.click(timeout=3000)
+            return
+        except Exception as error:
+            if not _is_detached_element_error(error) or attempt == 1:
+                raise
+
+            logger.info(f"ℹ️ {target_name}在点击前已刷新，重新定位后重试")
+            await asyncio.sleep(0.3)
+            current_target = await refresh_target()
+            if current_target is None:
+                raise Exception(f"{target_name}刷新后未找到") from error
+
+
 def _get_promotion_address_match_score(
     option_text: str,
     expected_text: str,
@@ -171,11 +199,85 @@ async def _find_promotion_address_entry(page):
     return None, ""
 
 
+async def _find_best_promotion_address_option(
+    roots: list[tuple[str, Any]],
+    input_box: dict[str, float] | None,
+    expected_text: str,
+    address: str,
+    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
+) -> tuple[Any | None, str]:
+    """从当前地址搜索结果中返回得分最高的可点击候选。"""
+    option_selectors = [
+        '[class*="item"]',
+        '[class*="option"]',
+        '[role="option"]',
+        'li',
+        'div',
+        'span',
+        'button',
+        'a',
+    ]
+    best_option = None
+    best_text = ""
+    best_score = None
+
+    for root_name, root in roots:
+        for selector in option_selectors:
+            try:
+                options = await root.query_selector_all(selector)
+            except Exception:
+                continue
+
+            for option in options:
+                try:
+                    if not await option.is_visible():
+                        continue
+                    option_text = re.sub(r"\s+", " ", str(await option.inner_text() or "")).strip()
+                    normalized_option_text = _normalize_address_text(option_text)
+                    if not normalized_option_text:
+                        continue
+                    if any(text in option_text for text in ["宝贝所在地", "搜索", "清空", "常用地址", "附近地址", "选择精准地址", "帮你推给更多同城买家"]):
+                        continue
+                    if len(normalized_option_text) < 2 or len(normalized_option_text) > 80:
+                        continue
+                    match_score = address_match_score(option_text, expected_text, address)
+                    if match_score is None:
+                        continue
+                    box = await option.bounding_box()
+                    if not box or box.get("height", 0) < 18 or box.get("width", 0) < 40:
+                        continue
+                    if input_box:
+                        if box.get("y", 0) + box.get("height", 0) <= input_box.get("y", 0):
+                            continue
+                        if box.get("y", 0) - input_box.get("y", 0) > 700:
+                            continue
+                        if box.get("x", 0) + box.get("width", 0) < input_box.get("x", 0) - 120:
+                            continue
+                        if box.get("x", 0) > input_box.get("x", 0) + input_box.get("width", 0) + 360:
+                            continue
+
+                    score = (
+                        *match_score,
+                        box.get("y", 0),
+                        box.get("x", 0),
+                        0 if root_name == "地址选择层" else 1,
+                    )
+                    if best_score is None or score < best_score:
+                        best_option = option
+                        best_text = option_text
+                        best_score = score
+                except Exception:
+                    continue
+
+    return best_option, best_text
+
+
 async def set_promotion_item_address(
     publisher: Any,
     item_data: dict,
     fallback_set_item_address: Callable[[dict], Awaitable[None]],
     address_match_score: Callable[[str, str, str], tuple[int, ...] | None] = _get_promotion_address_match_score,
+    retry_detached_option_click: bool = False,
 ) -> None:
     page = publisher.page
     if not page:
@@ -340,77 +442,37 @@ async def set_promotion_item_address(
     await search_input.type(address, delay=150)
     await asyncio.sleep(2.5)
 
-    option_selectors = [
-        '[class*="item"]',
-        '[class*="option"]',
-        '[role="option"]',
-        'li',
-        'div',
-        'span',
-        'button',
-        'a',
-    ]
-    best_option = None
-    best_text = ""
-    best_score = None
-
-    for root_name, root in roots:
-        for selector in option_selectors:
-            try:
-                options = await root.query_selector_all(selector)
-            except Exception:
-                continue
-
-            for option in options:
-                try:
-                    if not await option.is_visible():
-                        continue
-                    option_text = re.sub(r"\s+", " ", str(await option.inner_text() or "")).strip()
-                    normalized_option_text = _normalize_address_text(option_text)
-                    if not normalized_option_text:
-                        continue
-                    if any(text in option_text for text in ["宝贝所在地", "搜索", "清空", "常用地址", "附近地址", "选择精准地址", "帮你推给更多同城买家"]):
-                        continue
-                    if len(normalized_option_text) < 2 or len(normalized_option_text) > 80:
-                        continue
-                    match_score = address_match_score(
-                        option_text,
-                        expected_text,
-                        address,
-                    )
-                    if match_score is None:
-                        continue
-                    box = await option.bounding_box()
-                    if not box or box.get("height", 0) < 18 or box.get("width", 0) < 40:
-                        continue
-                    if input_box:
-                        if box.get("y", 0) + box.get("height", 0) <= input_box.get("y", 0):
-                            continue
-                        if box.get("y", 0) - input_box.get("y", 0) > 700:
-                            continue
-                        if box.get("x", 0) + box.get("width", 0) < input_box.get("x", 0) - 120:
-                            continue
-                        if box.get("x", 0) > input_box.get("x", 0) + input_box.get("width", 0) + 360:
-                            continue
-
-                    score = (
-                        *match_score,
-                        box.get("y", 0),
-                        box.get("x", 0),
-                        0 if root_name == "地址选择层" else 1,
-                    )
-                    if best_score is None or score < best_score:
-                        best_option = option
-                        best_text = option_text
-                        best_score = score
-                except Exception:
-                    continue
+    best_option, best_text = await _find_best_promotion_address_option(
+        roots=roots,
+        input_box=input_box,
+        expected_text=expected_text,
+        address=address,
+        address_match_score=address_match_score,
+    )
 
     if not best_option:
         raise Exception(f"未找到“{address}”对应的宝贝所在地候选")
 
     logger.info(f"🎯 选择返佣宝贝所在地候选: {best_text}")
-    await best_option.click()
+
+    async def refresh_best_option():
+        refreshed_option, _ = await _find_best_promotion_address_option(
+            roots=roots,
+            input_box=input_box,
+            expected_text=expected_text,
+            address=address,
+            address_match_score=address_match_score,
+        )
+        return refreshed_option
+
+    if retry_detached_option_click:
+        await _click_with_detached_retry(
+            target=best_option,
+            refresh_target=refresh_best_option,
+            target_name=f"宝贝所在地候选“{best_text}”",
+        )
+    else:
+        await best_option.click()
     await asyncio.sleep(1)
 
     confirm_selectors = [

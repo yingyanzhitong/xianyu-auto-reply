@@ -32,6 +32,7 @@ from common.services.item_service import ItemService
 from common.services.shop_fans_price_service import build_fans_price_payload
 from common.services.shop_xianyu_publisher import ShopXianyuPublisher
 from common.services.promotion_address_selector import (
+    _click_with_detached_retry,
     _get_promotion_address_match_score,
     _get_shop_address_match_score,
 )
@@ -252,6 +253,35 @@ class AccountIsolationTests(unittest.IsolatedAsyncioTestCase):
 
 
 class ExternalRequestValidationTests(unittest.TestCase):
+    def test_address_option_click_relocates_after_dom_refresh(self):
+        class DetachedOption:
+            async def click(self, **_kwargs):
+                raise Exception("ElementHandle.click: Element is not attached to the DOM")
+
+        class RefreshedOption:
+            def __init__(self):
+                self.clicked = False
+
+            async def click(self, **_kwargs):
+                self.clicked = True
+
+        async def run_test():
+            refreshed = RefreshedOption()
+            refresh_target = AsyncMock(return_value=refreshed)
+            with patch(
+                "common.services.promotion_address_selector.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                await _click_with_detached_retry(
+                    target=DetachedOption(),
+                    refresh_target=refresh_target,
+                    target_name="测试候选",
+                )
+            refresh_target.assert_awaited_once()
+            self.assertTrue(refreshed.clicked)
+
+        asyncio.run(run_test())
+
     def test_external_material_limit_and_image_validation(self):
         request = ExternalMaterialUpsertRequest(
             source="gamer520",
@@ -382,6 +412,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
                 set_address.await_args.kwargs["address_match_score"],
                 _get_shop_address_match_score,
             )
+            self.assertTrue(set_address.await_args.kwargs["retry_detached_option_click"])
 
         asyncio.run(run_test())
 
