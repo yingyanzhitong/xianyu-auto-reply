@@ -141,7 +141,7 @@ async def _click_shop_address_option(
     """依次点击鱼小铺候选及其可点击父容器，直到地点实际回填。"""
     targets = [option]
     current = option
-    for _ in range(3):
+    for _ in range(6):
         try:
             parent = await current.query_selector("xpath=..")
             if not parent or not await parent.is_visible():
@@ -178,6 +178,24 @@ async def _click_shop_address_option(
             return
         if _matches_selected_address_alias(selected_text, option_text):
             logger.info("✅ 鱼小铺地址候选已通过可点击容器回填")
+            return
+
+        try:
+            await target.click(force=True)
+        except Exception as exc:
+            if _is_detached_element_error(exc):
+                has_detached_target = True
+                continue
+            if "element is not enabled" in str(exc).lower():
+                continue
+            raise
+
+        await asyncio.sleep(0.8)
+        _, selected_text = await _find_promotion_address_entry(page)
+        if address_match_score(selected_text, expected_text, address) is not None:
+            return
+        if _matches_selected_address_alias(selected_text, option_text):
+            logger.info("✅ 鱼小铺地址候选已通过强制点击容器回填")
             return
 
     if has_detached_target and refresh_option:
