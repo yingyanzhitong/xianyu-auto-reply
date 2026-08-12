@@ -191,26 +191,50 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
         logger.info("[鱼小铺] 已开启支持自提")
 
     async def _click_publish_target(self, publish_btn, publish_btn_selector: str | None) -> None:
-        """鱼小铺直接点击已验证按钮；刷新时仅重新查询同一选择器一次。"""
+        """点击鱼小铺发布按钮，兼容按钮在表单校验后动态重绘。"""
         if publish_btn is None:
             raise Exception("未找到鱼小铺发布按钮")
 
         try:
-            await publish_btn.click(timeout=5000)
+            await publish_btn.click(timeout=2000)
             return
         except Exception as error:
-            if not _is_detached_element_error(error) or not self.page or not publish_btn_selector:
+            message = str(error).lower()
+            is_dynamic_button_error = (
+                _is_detached_element_error(error)
+                or "element is not visible" in message
+                or "element is not enabled" in message
+            )
+            if not is_dynamic_button_error or not self.page or not publish_btn_selector:
                 raise
 
-            logger.info("ℹ️ 鱼小铺发布按钮在点击前已刷新，重新定位后重试")
-            refreshed_btn = await self.page.wait_for_selector(
-                publish_btn_selector,
-                state="visible",
-                timeout=5000,
-            )
-            if refreshed_btn is None or not await refreshed_btn.is_enabled():
-                raise Exception("鱼小铺发布按钮刷新后不可用") from error
+            logger.info("ℹ️ 鱼小铺发布按钮在点击前发生状态变化，重新查找可用按钮")
+            refreshed_btn = await self._find_enabled_publish_button(publish_btn_selector)
+            if refreshed_btn is None:
+                raise Exception("鱼小铺发布按钮刷新后未恢复可用状态") from error
             await refreshed_btn.click(timeout=5000)
+
+    async def _find_enabled_publish_button(self, selector: str):
+        """从同一选择器的多个命中项中等待真实可用的发布按钮。"""
+        if not self.page:
+            return None
+
+        for attempt in range(12):
+            try:
+                candidates = await self.page.query_selector_all(selector)
+            except Exception:
+                candidates = []
+
+            for candidate in candidates:
+                try:
+                    if await candidate.is_visible() and await candidate.is_enabled():
+                        return candidate
+                except Exception:
+                    continue
+
+            if attempt < 11:
+                await asyncio.sleep(0.5)
+        return None
 
     async def _click_publish_button(self, result: dict) -> None:
         """兼容 seller.goofish 成功页使用 itemId 而不是 id 参数。"""
