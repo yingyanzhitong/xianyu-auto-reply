@@ -533,6 +533,56 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_address_tries_next_amap_poi_after_query_echo_fails(self):
+        async def run_test():
+            alternative = SimpleNamespace(
+                click=AsyncMock(),
+                is_visible=AsyncMock(return_value=True),
+                inner_text=AsyncMock(return_value="建明生活小区(南1门)"),
+            )
+            parent = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+                get_attribute=AsyncMock(return_value="amap-sug-result"),
+            )
+            parent.bounding_box = AsyncMock(return_value={"x": 120, "y": 320, "width": 280, "height": 48})
+            parent.query_selector = AsyncMock(return_value=None)
+            option = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+                inner_text=AsyncMock(return_value="建明生活小区谈固南大街"),
+            )
+            option.bounding_box = AsyncMock(return_value={"x": 160, "y": 332, "width": 180, "height": 24})
+            option.query_selector = AsyncMock(return_value=parent)
+            parent.query_selector_all = AsyncMock(return_value=[option, alternative])
+
+            with patch(
+                "common.services.promotion_address_selector._find_promotion_address_entry",
+                new=AsyncMock(side_effect=[
+                    (None, "上海市徐汇区牙病防治所"),
+                    (None, "上海市徐汇区牙病防治所"),
+                    (None, "建明生活小区(南1门)"),
+                ]),
+            ), patch(
+                "common.services.promotion_address_selector.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                await _click_shop_address_option(
+                    page=SimpleNamespace(),
+                    option=option,
+                    option_text="建明生活小区谈固南大街",
+                    expected_text="",
+                    address="建明生活小区 谈固南大街",
+                    address_match_score=_get_shop_address_match_score,
+                )
+
+            alternative.click.assert_awaited_once_with(timeout=3000)
+            parent.click.assert_not_called()
+
+        asyncio.run(run_test())
+
     def test_shop_publisher_uses_its_own_address_matcher(self):
         async def run_test():
             publisher = ShopXianyuPublisher()

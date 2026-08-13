@@ -138,6 +138,55 @@ def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> 
     return selected == candidate_label or selected in candidate_label or candidate_label in selected
 
 
+async def _click_alternative_amap_options(
+    *,
+    page: Any,
+    option: Any,
+    option_text: str,
+    expected_text: str,
+    address: str,
+    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
+) -> bool:
+    """高德首项为搜索词回显时，依次尝试后续真实 POI 候选。"""
+    try:
+        result_container = await option.query_selector("xpath=..")
+        if not result_container:
+            return False
+        container_class = str(await result_container.get_attribute("class") or "")
+        if "amap-sug-result" not in container_class:
+            return False
+        candidates = await result_container.query_selector_all(".auto-item")
+    except Exception:
+        return False
+
+    for candidate in candidates:
+        try:
+            if not await candidate.is_visible():
+                continue
+            candidate_text = re.sub(r"\s+", " ", str(await candidate.inner_text() or "")).strip()
+            if not candidate_text or _normalize_address_text(candidate_text) == _normalize_address_text(option_text):
+                continue
+            if address_match_score(candidate_text, expected_text, address) is None:
+                continue
+
+            logger.info(f"ℹ️ 高德首项未回填，尝试后续 POI 候选: {candidate_text}")
+            await candidate.click(timeout=3000)
+            await asyncio.sleep(0.8)
+            _, selected_text = await _find_promotion_address_entry(page)
+            if address_match_score(selected_text, expected_text, address) is not None:
+                logger.info("✅ 鱼小铺地址候选已通过后续 POI 回填")
+                return True
+            if _matches_selected_address_alias(selected_text, candidate_text):
+                logger.info("✅ 鱼小铺地址候选已通过后续 POI 回填")
+                return True
+        except Exception as exc:
+            if _is_unavailable_element_error(exc):
+                continue
+            logger.info(f"ℹ️ 后续 POI 候选点击未生效: {exc}")
+
+    return False
+
+
 async def _click_shop_address_option(
     *,
     page: Any,
@@ -229,6 +278,16 @@ async def _click_shop_address_option(
             if _matches_selected_address_alias(selected_text, option_text):
                 logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
                 return
+
+        if target is option and await _click_alternative_amap_options(
+            page=page,
+            option=option,
+            option_text=option_text,
+            expected_text=expected_text,
+            address=address,
+            address_match_score=address_match_score,
+        ):
+            return
 
     if has_detached_target and refresh_option:
         refreshed_option = await refresh_option()
