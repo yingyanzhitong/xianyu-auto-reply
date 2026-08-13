@@ -557,11 +557,11 @@ class ExternalRequestValidationTests(unittest.TestCase):
             option.bounding_box = AsyncMock(return_value={"x": 160, "y": 332, "width": 180, "height": 24})
             option.query_selector = AsyncMock(return_value=parent)
             parent.query_selector_all = AsyncMock(return_value=[option, alternative])
+            page = SimpleNamespace(query_selector_all=AsyncMock(return_value=[option, alternative]))
 
             with patch(
                 "common.services.promotion_address_selector._find_promotion_address_entry",
                 new=AsyncMock(side_effect=[
-                    (None, "上海市徐汇区牙病防治所"),
                     (None, "上海市徐汇区牙病防治所"),
                     (None, "建明生活小区(南1门)"),
                 ]),
@@ -570,7 +570,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
                 new=AsyncMock(),
             ):
                 await _click_shop_address_option(
-                    page=SimpleNamespace(),
+                    page=page,
                     option=option,
                     option_text="建明生活小区谈固南大街",
                     expected_text="",

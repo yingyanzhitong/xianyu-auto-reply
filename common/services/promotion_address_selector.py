@@ -141,7 +141,6 @@ def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> 
 async def _click_alternative_amap_options(
     *,
     page: Any,
-    option: Any,
     option_text: str,
     expected_text: str,
     address: str,
@@ -149,13 +148,7 @@ async def _click_alternative_amap_options(
 ) -> bool:
     """高德首项为搜索词回显时，依次尝试后续真实 POI 候选。"""
     try:
-        result_container = await option.query_selector("xpath=..")
-        if not result_container:
-            return False
-        container_class = str(await result_container.get_attribute("class") or "")
-        if "amap-sug-result" not in container_class:
-            return False
-        candidates = await result_container.query_selector_all(".auto-item")
+        candidates = await page.query_selector_all(".amap-sug-result .auto-item")
     except Exception:
         return False
 
@@ -239,6 +232,15 @@ async def _click_shop_address_option(
             logger.info("✅ 鱼小铺地址候选已通过可点击容器回填")
             return
 
+        if target is option and await _click_alternative_amap_options(
+            page=page,
+            option_text=option_text,
+            expected_text=expected_text,
+            address=address,
+            address_match_score=address_match_score,
+        ):
+            return
+
         try:
             await target.click(force=True)
         except Exception as exc:
@@ -278,16 +280,6 @@ async def _click_shop_address_option(
             if _matches_selected_address_alias(selected_text, option_text):
                 logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
                 return
-
-        if target is option and await _click_alternative_amap_options(
-            page=page,
-            option=option,
-            option_text=option_text,
-            expected_text=expected_text,
-            address=address,
-            address_match_score=address_match_score,
-        ):
-            return
 
     if has_detached_target and refresh_option:
         refreshed_option = await refresh_option()
