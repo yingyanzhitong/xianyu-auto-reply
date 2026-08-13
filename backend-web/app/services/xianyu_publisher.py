@@ -1690,16 +1690,28 @@ class XianyuPublisher:
 
         publish_btn = None
         publish_btn_selector = None
+        last_publish_btn = None
+        last_publish_btn_selector = None
         for selector in publish_selectors:
             try:
-                publish_btn = await self.page.wait_for_selector(selector, timeout=5000)
-                if publish_btn:
-                    if await publish_btn.is_visible() and await publish_btn.is_enabled():
+                candidate = await self.page.wait_for_selector(selector, timeout=5000)
+                if candidate:
+                    last_publish_btn = candidate
+                    last_publish_btn_selector = selector
+                    if await candidate.is_visible() and await candidate.is_enabled():
+                        publish_btn = candidate
                         publish_btn_selector = selector
                         logger.info(f"✅ 找到发布按钮: {selector}")
                         break
             except Exception:
                 continue
+
+        if publish_btn is None and last_publish_btn is not None:
+            publish_btn = last_publish_btn
+            publish_btn_selector = last_publish_btn_selector
+            logger.info(
+                f"ℹ️ 发布按钮暂未可用，交由发布器重新定位: {publish_btn_selector}"
+            )
 
         if publish_btn:
             await self.page.screenshot(full_page=True)

@@ -576,6 +576,34 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_publisher_keeps_selector_for_temporarily_disabled_publish_button(self):
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            disabled_button = SimpleNamespace(
+                is_enabled=AsyncMock(return_value=False),
+                is_visible=AsyncMock(return_value=True),
+            )
+            publisher.page = SimpleNamespace(
+                query_selector=AsyncMock(return_value=None),
+                wait_for_selector=AsyncMock(return_value=disabled_button),
+                screenshot=AsyncMock(),
+            )
+            publisher._click_publish_target = AsyncMock(side_effect=RuntimeError("stop after target"))
+
+            with patch(
+                "common.services._shared_xianyu_publisher.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                with self.assertRaisesRegex(RuntimeError, "stop after target"):
+                    await publisher._click_publish_button({})
+
+            publisher._click_publish_target.assert_awaited_once_with(
+                disabled_button,
+                'button[type="submit"]',
+            )
+
+        asyncio.run(run_test())
+
     def test_shop_publisher_confirms_new_listing_with_truncated_title(self):
         item = ShopXianyuPublisher._find_new_matching_listing(
             items=[
