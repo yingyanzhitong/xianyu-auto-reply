@@ -151,7 +151,7 @@ class ItemInfoManager:
             logger.info(f"【{self.cookie_id}】请求参数 params: {params}")
             logger.info(f"【{self.cookie_id}】请求数据 data: {data}")
             logger.info(f"【{self.cookie_id}】请求数据 data_val: {data_val}")
-            logger.info(f"【{self.cookie_id}】请求头 headers: {dict(headers)}")
+            logger.info(f"【{self.cookie_id}】请求头已构造（Cookie 已脱敏）")
             
             async with self.session.post(
                 'https://h5api.m.goofish.com/h5/mtop.idle.web.xyh.item.list/1.0/',

@@ -13,6 +13,8 @@ from common.services.promotion_address_selector import (
     set_promotion_item_address,
 )
 from common.services.promotion_xianyu_publisher import PromotionXianyuPublisher
+from common.utils.item_info_manager import ItemInfoManager
+from common.utils.xianyu_utils import trans_cookies
 
 
 SHOP_SHIPPING_LABELS = {
@@ -31,6 +33,8 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self._shop_item_data: dict[str, Any] = {}
+        self._listing_item_ids_before_publish: set[str] = set()
+        self._verification_cookie = ""
 
     @staticmethod
     def parse_published_item_id(url: str | None) -> str | None:
@@ -86,14 +90,119 @@ class ShopXianyuPublisher(PromotionXianyuPublisher):
         should_close: bool = True,
     ) -> dict:
         self._shop_item_data = dict(item_data)
+        self._verification_cookie = str(cookie_data.get("cookie") or "")
+        self._listing_item_ids_before_publish = await self._get_recent_listing_ids(
+            self._verification_cookie
+        )
         prepared_item_data = dict(item_data)
         prepared_item_data["stock"] = item_data.get("shop_stock") or 999
-        return await super().publish_item(
+        result = await super().publish_item(
             item_data=prepared_item_data,
             cookie_data=cookie_data,
             reuse_browser=reuse_browser,
             should_close=should_close,
         )
+        await self._confirm_unredirected_publish(result)
+        return result
+
+    async def _get_recent_listing_ids(self, cookie: str) -> set[str]:
+        """读取在售首页商品 ID，用于确认本次是否新增了商品。"""
+        if not cookie:
+            return set()
+
+        parsed_cookie = trans_cookies(cookie)
+        user_id = parsed_cookie.get("unb") or parsed_cookie.get("cnaui")
+        if not user_id:
+            return set()
+
+        manager = ItemInfoManager("shop_publish_verify", cookie)
+        try:
+            response = await manager.get_item_list_info(
+                page_number=1,
+                page_size=20,
+                myid=user_id,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"[鱼小铺] 发布前读取在售商品失败，跳过额外核验：{exc}")
+            return set()
+        finally:
+            await manager.close()
+
+        if not response.get("success"):
+            logger.warning("[鱼小铺] 发布前未读取到在售商品，跳过额外核验")
+            return set()
+        return {
+            str(item.get("id"))
+            for item in response.get("items") or []
+            if item.get("id")
+        }
+
+    @staticmethod
+    def _find_new_matching_listing(
+        items: list[dict[str, Any]],
+        expected_title: str,
+        existing_ids: set[str],
+    ) -> dict[str, Any] | None:
+        """从新出现的在售商品中匹配平台截断后的发布标题。"""
+        normalized_expected = re.sub(r"\s+", "", str(expected_title or ""))
+        if len(normalized_expected) < 8:
+            return None
+
+        for item in items:
+            item_id = str(item.get("id") or "")
+            normalized_title = re.sub(r"\s+", "", str(item.get("title") or ""))
+            if not item_id or item_id in existing_ids or len(normalized_title) < 8:
+                continue
+            if normalized_expected.startswith(normalized_title) or normalized_title.startswith(normalized_expected):
+                return item
+        return None
+
+    async def _confirm_unredirected_publish(self, result: dict[str, Any]) -> None:
+        """卖家页未跳转时，以新增的在售商品为准确认发布结果。"""
+        if result.get("success") or result.get("failure_reason") != "page_not_redirected":
+            return
+
+        # 闲鱼在发布后可能延迟写入列表，短暂等待后再查询一次。
+        await asyncio.sleep(2)
+        cookie = self._verification_cookie
+        parsed_cookie = trans_cookies(cookie)
+        user_id = parsed_cookie.get("unb") or parsed_cookie.get("cnaui")
+        if not cookie or not user_id:
+            return
+
+        manager = ItemInfoManager("shop_publish_verify", cookie)
+        try:
+            response = await manager.get_item_list_info(
+                page_number=1,
+                page_size=20,
+                myid=user_id,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"[鱼小铺] 发布后读取在售商品失败，保留原结果：{exc}")
+            return
+        finally:
+            await manager.close()
+
+        if not response.get("success"):
+            return
+        item = self._find_new_matching_listing(
+            response.get("items") or [],
+            self._shop_item_data.get("title", ""),
+            self._listing_item_ids_before_publish,
+        )
+        if item is None:
+            return
+
+        item_id = str(item["id"])
+        result.update(
+            success=True,
+            message="商品发布成功（卖家页未跳转，已由在售列表核验）",
+            item_id=item_id,
+            item_url=f"https://www.goofish.com/item?id={item_id}",
+            success_flag="shop_listing_verified",
+        )
+        result.pop("failure_reason", None)
+        logger.info(f"✅ 鱼小铺商品已由在售列表核验成功，itemId={item_id}")
 
     async def _set_item_address(self, item_data: dict):
         """沿用卖家页的元素定位，但采用标准发布一致的地址候选匹配语义。"""

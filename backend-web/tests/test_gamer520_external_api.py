@@ -576,6 +576,55 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_publisher_confirms_new_listing_with_truncated_title(self):
+        item = ShopXianyuPublisher._find_new_matching_listing(
+            items=[
+                {"id": "existing", "title": "【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈"},
+                {"id": "new", "title": "【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈"},
+            ],
+            expected_title="【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈火焚天-无双战阵+全DLC+修改器|解压即撸|",
+            existing_ids={"existing"},
+        )
+
+        self.assertEqual(item, {"id": "new", "title": "【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈"})
+
+    def test_shop_publisher_marks_unredirected_new_listing_as_success(self):
+        async def run_test():
+            publisher = ShopXianyuPublisher()
+            publisher._shop_item_data = {
+                "title": "【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈火焚天-无双战阵+全DLC+修改器|解压即撸|",
+            }
+            publisher._listing_item_ids_before_publish = {"existing"}
+            publisher._verification_cookie = "unb=123"
+            manager = SimpleNamespace(
+                get_item_list_info=AsyncMock(return_value={
+                    "success": True,
+                    "items": [{
+                        "id": "1075836696707",
+                        "title": "【秒发】赵云传 云汉腾龙|中字-国语|V1.1.5Fix-烈",
+                    }],
+                }),
+                close=AsyncMock(),
+            )
+            result = {"success": False, "failure_reason": "page_not_redirected"}
+
+            with patch(
+                "common.services.shop_xianyu_publisher.ItemInfoManager",
+                return_value=manager,
+            ), patch(
+                "common.services.shop_xianyu_publisher.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                await publisher._confirm_unredirected_publish(result)
+
+            self.assertTrue(result["success"])
+            self.assertEqual(result["item_id"], "1075836696707")
+            self.assertEqual(result["success_flag"], "shop_listing_verified")
+            self.assertNotIn("failure_reason", result)
+            manager.close.assert_awaited_once()
+
+        asyncio.run(run_test())
+
     def test_second_delivery_prefix_does_not_change_product_name(self):
         self.assertEqual(
             _comparable_material_titles("【秒发】  测试游戏 "),
