@@ -138,6 +138,29 @@ def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> 
     return selected == candidate_label or selected in candidate_label or candidate_label in selected
 
 
+def _is_amap_query_echo(option_text: str, address: str) -> bool:
+    """高德首项会回显完整搜索词，该项不是可回填的 POI。"""
+    normalized_option = _normalize_address_text(option_text)
+    normalized_address = _normalize_address_text(address)
+    return bool(normalized_option and normalized_address and normalized_option == normalized_address)
+
+
+def _matches_amap_poi_candidate(
+    candidate_text: str,
+    expected_text: str,
+    address: str,
+    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
+) -> bool:
+    """匹配高德 POI 名称；POI 常只保留地址关键词，未必含完整街道。"""
+    if address_match_score(candidate_text, expected_text, address) is not None:
+        return True
+
+    normalized_address = _normalize_address_text(address)
+    poi_name = re.sub(r"[（(][^）)]*[）)]", "", candidate_text)
+    normalized_poi_name = _normalize_address_text(poi_name)
+    return len(normalized_poi_name) >= 4 and normalized_poi_name in normalized_address
+
+
 async def _click_alternative_amap_options(
     *,
     page: Any,
@@ -159,7 +182,12 @@ async def _click_alternative_amap_options(
             candidate_text = re.sub(r"\s+", " ", str(await candidate.inner_text() or "")).strip()
             if not candidate_text or _normalize_address_text(candidate_text) == _normalize_address_text(option_text):
                 continue
-            if address_match_score(candidate_text, expected_text, address) is None:
+            if not _matches_amap_poi_candidate(
+                candidate_text,
+                expected_text,
+                address,
+                address_match_score,
+            ):
                 continue
 
             logger.info(f"ℹ️ 高德首项未回填，尝试后续 POI 候选: {candidate_text}")
@@ -191,6 +219,15 @@ async def _click_shop_address_option(
     refresh_option: Callable[[], Awaitable[Any]] | None = None,
 ) -> None:
     """依次点击鱼小铺候选及其可点击父容器，直到地点实际回填。"""
+    if _is_amap_query_echo(option_text, address) and await _click_alternative_amap_options(
+        page=page,
+        option_text=option_text,
+        expected_text=expected_text,
+        address=address,
+        address_match_score=address_match_score,
+    ):
+        return
+
     targets = [option]
     current = option
     for _ in range(6):

@@ -562,7 +562,6 @@ class ExternalRequestValidationTests(unittest.TestCase):
             with patch(
                 "common.services.promotion_address_selector._find_promotion_address_entry",
                 new=AsyncMock(side_effect=[
-                    (None, "上海市徐汇区牙病防治所"),
                     (None, "建明生活小区(南1门)"),
                 ]),
             ), patch(
@@ -579,6 +578,7 @@ class ExternalRequestValidationTests(unittest.TestCase):
                 )
 
             alternative.click.assert_awaited_once_with(timeout=3000)
+            option.click.assert_not_called()
             parent.click.assert_not_called()
 
         asyncio.run(run_test())
