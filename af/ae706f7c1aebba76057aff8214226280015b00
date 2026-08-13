@@ -1,0 +1,34 @@
+frontend/package-lock.json
+  s_368cb812a71a4b::t_fbf799b3811ae5 3,9
+frontend/package.json
+  s_368cb812a71a4b::t_a538aefe0625bd 4
+package-lock.json
+  s_368cb812a71a4b::t_342c90c6af4304 3,9
+package.json
+  s_368cb812a71a4b::t_2f9b558fd8cacb 3
+CHANGELOG.md
+  s_368cb812a71a4b::t_9b21d3250a76e5 3-7
+common/tests/test_delivery_chat_recovery.py
+  s_368cb812a71a4b::t_f65d969d32e9f1 1-127
+scheduler/app/services/scheduler/redelivery_task.py
+  s_368cb812a71a4b::t_0b4a5fa8371a5b 488,494-496
+websocket/app/services/xianyu/xianyu_async.py
+  s_368cb812a71a4b::t_662d42830a4317 2049-2057,2084-2139,2207-2268
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "afae706f7c1aebba76057aff8214226280015b00",
+  "prompts": {},
+  "logical_commit_id": "afae706f7c1aebba76057aff8214226280015b00",
+  "sessions": {
+    "s_368cb812a71a4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffc11-7d11-79a2-989e-ff4c2906805a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
