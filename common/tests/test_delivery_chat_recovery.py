@@ -52,6 +52,16 @@ class DeliveryChatRecoveryTest(unittest.TestCase):
         self.assertIn("expected_users", parser)
         self.assertIn('extension.get("itemId")', parser)
 
+    def test_create_chat_uses_the_current_conversation_request_schema(self):
+        path = ROOT / "websocket/app/services/xianyu/xianyu_async.py"
+        source = _function_source(path, "XianyuAsync", "create_chat_conversation")
+
+        self.assertIn("sorted(", source)
+        self.assertIn('"orderId": ""', source)
+        self.assertIn('"source": ""', source)
+        self.assertIn('"pairFirst": f"{pair_first_id}@goofish"', source)
+        self.assertIn('"pairSecond": f"{pair_second_id}@goofish"', source)
+
     def test_conversation_parser_prefers_the_matching_item(self):
         parser = _load_static_function(
             ROOT / "websocket/app/services/xianyu/xianyu_async.py",

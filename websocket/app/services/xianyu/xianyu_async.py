@@ -2004,16 +2004,29 @@ class XianyuAsync:
         if not item_id:
             raise ValueError("item_id 不能为空")
 
+        participant_ids = [str(to_user_id), str(self.myid)]
+        try:
+            pair_first_id, pair_second_id = sorted(
+                participant_ids,
+                key=lambda user_id: int(user_id),
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError("会话用户ID格式异常") from exc
+
         mid = generate_mid()
         msg = {
             "lwp": "/r/SingleChatConversation/create",
             "headers": {"mid": mid},
             "body": [
                 {
-                    "pairFirst": f"{to_user_id}@goofish",
-                    "pairSecond": f"{self.myid}@goofish",
+                    "pairFirst": f"{pair_first_id}@goofish",
+                    "pairSecond": f"{pair_second_id}@goofish",
                     "bizType": "1",
-                    "extension": {"itemId": str(item_id)},
+                    "extension": {
+                        "itemId": str(item_id),
+                        "orderId": "",
+                        "source": "",
+                    },
                     "ctx": {"appVersion": "1.0", "platform": "web"},
                 }
             ],
