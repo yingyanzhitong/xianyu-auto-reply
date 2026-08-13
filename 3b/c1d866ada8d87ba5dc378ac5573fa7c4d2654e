@@ -1,0 +1,30 @@
+common/tests/test_notification_dispatch.py
+  s_368cb812a71a4b::t_ffda75e3627127 91,101-106,108-132
+common/tests/test_notification_template.py
+  s_368cb812a71a4b::t_31fb0c985f6d71 70-85
+common/utils/notification_template.py
+  s_368cb812a71a4b::t_ba76bb32b121c5 25-27
+websocket/app/services/xianyu/auto_reply_service.py
+  s_368cb812a71a4b::t_2976520dbdae33 583-596,737,902-904,1039-1041,1052-1054,1078-1079,1081,1083-1087,1096-1098,1946-1953
+websocket/app/services/xianyu/notification_manager.py
+  s_368cb812a71a4b::t_e6451a125d8340 62-64,130-131,133,137-139,154-156
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_368cb812a71a4b::t_e8679ee6a09a82 125-127,164-165,169-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3bc1d866ada8d87ba5dc378ac5573fa7c4d2654e",
+  "prompts": {},
+  "logical_commit_id": "3bc1d866ada8d87ba5dc378ac5573fa7c4d2654e",
+  "sessions": {
+    "s_368cb812a71a4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffc11-7d11-79a2-989e-ff4c2906805a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
