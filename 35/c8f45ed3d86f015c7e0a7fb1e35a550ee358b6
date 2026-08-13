@@ -1,0 +1,42 @@
+CHANGELOG.md
+  s_8267a5163e4505::t_c90cffa523ca04 3-7
+common/services/promotion_address_selector.py
+  s_bb1b62c83f3794::t_bd08c664fc1c79 151,233-241
+package.json
+  s_8267a5163e4505::t_22376d390a30e6 3
+backend-web/tests/test_gamer520_external_api.py
+  s_39fab52e9aa3b7::t_ebab9ae7f116e9 560,573
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "35c8f45ed3d86f015c7e0a7fb1e35a550ee358b6",
+  "prompts": {},
+  "logical_commit_id": "35c8f45ed3d86f015c7e0a7fb1e35a550ee358b6",
+  "sessions": {
+    "s_39fab52e9aa3b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff9bb-0dda-7f72-9b99-327920764e8e",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_8267a5163e4505": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffa20-7f1e-7e20-b7e5-4801f0c59197",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    },
+    "s_bb1b62c83f3794": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff4a1-0118-7ee2-8d1b-f1afd5db2569",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
