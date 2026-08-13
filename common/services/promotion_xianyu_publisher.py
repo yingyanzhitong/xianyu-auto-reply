@@ -29,12 +29,6 @@ class PromotionXianyuPublisher(BaseXianyuPublisher):
         "https://seller.goofish.com/?site=COMMONPRO&spm=a21107h.42826273.0.0#/seller-item/publish"
     )
 
-    @staticmethod
-    def is_publish_form_ready(page_text: str | None) -> bool:
-        """保持返佣卖家页原有的表单就绪判断。"""
-        text = str(page_text or "")
-        return "添加首图" in text or "宝贝图片" in text
-
     async def _open_publish_page_with_cookie(self) -> None:
         """按旧逻辑在写入 Cookie 后进入返佣系统卖家发布页面。"""
         if not self.page:
@@ -195,12 +189,12 @@ class PromotionXianyuPublisher(BaseXianyuPublisher):
                 logger.error("Cookie已失效，页面内容包含未登录提示")
                 raise Exception("Cookie已失效，页面显示未登录状态")
 
-            if not self.is_publish_form_ready(page_text):
+            if "添加首图" not in page_text and "宝贝图片" not in page_text:
                 logger.info("⏳ 等待React渲染发布页面...")
                 await asyncio.sleep(5)
                 page_text = await self.page.evaluate("() => document.body.innerText")
 
-                if not self.is_publish_form_ready(page_text):
+                if "添加首图" not in page_text and "宝贝图片" not in page_text:
                     logger.error("页面可能不是发布页面，或者Cookie无效")
                     logger.error(f"页面内容: {page_text[:500]}")
                     raise Exception("页面可能不是发布页面，或者Cookie无效")

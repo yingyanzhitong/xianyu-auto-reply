@@ -20,32 +20,6 @@ import { MaterialFormModal } from './MaterialFormModal'
 
 const CATEGORIES = ['数码家电', '服饰鞋包', '家居日用', '图书音像', '美妆个护', '母婴用品', '运动户外', '食品生鲜', '虚拟商品', '其他']
 const CONDITIONS = ['全新', '99新', '95新', '9成新', '8成新', '7成新以下']
-const SHOP_SHIPPING_LABELS: Record<string, string> = {
-  free: '包邮',
-  distance: '按距离计费',
-  fixed: '一口价',
-  no_shipping: '无需邮寄',
-}
-
-function getShopSummary(material: ProductMaterial) {
-  const shipping = material.shop_shipping_mode
-    ? SHOP_SHIPPING_LABELS[material.shop_shipping_mode]
-    : '包邮（默认）'
-  const fee = material.shop_shipping_mode === 'fixed' && material.shop_shipping_fee != null
-    ? ` ¥${material.shop_shipping_fee}`
-    : ''
-  const fanPrices = [
-    material.shop_fans_price_all != null ? `全 ${material.shop_fans_price_all}` : '',
-    material.shop_fans_price_old != null ? `老 ${material.shop_fans_price_old}` : '',
-    material.shop_fans_price_bought != null ? `购 ${material.shop_fans_price_bought}` : '',
-  ].filter(Boolean)
-  return {
-    stock: material.shop_stock ?? 999,
-    shipping: `${shipping}${fee}`,
-    pickup: material.shop_support_pickup ? '支持自提' : '',
-    fans: fanPrices.join(' / '),
-  }
-}
 
 export function ProductMaterials() {
   const { addToast } = useUIStore()
@@ -292,26 +266,23 @@ export function ProductMaterials() {
                 <th>分类</th>
                 <th>成色</th>
                 <th>图片</th>
-                <th>鱼小铺设置</th>
                 <th>创建时间</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody>
               {tableLoading ? (
-                <tr><td colSpan={isAdmin ? 10 : 9} className="text-center py-12">
+                <tr><td colSpan={isAdmin ? 9 : 8} className="text-center py-12">
                   <RefreshCw className="w-6 h-6 animate-spin text-blue-500 mx-auto" />
                 </td></tr>
               ) : materials.length === 0 ? (
-                <tr><td colSpan={isAdmin ? 10 : 9} className="text-center py-12 text-slate-400">
+                <tr><td colSpan={isAdmin ? 9 : 8} className="text-center py-12 text-slate-400">
                   <div className="flex flex-col items-center gap-2">
                     <Image className="w-12 h-12 text-slate-300" />
                     <p>暂无素材，点击「新建素材」添加</p>
                   </div>
                 </td></tr>
-              ) : materials.map(m => {
-                const shop = getShopSummary(m)
-                return (
+              ) : materials.map(m => (
                 <tr key={m.id} className={selectedIds.includes(m.id) ? 'bg-blue-50 dark:bg-blue-900/10' : ''}>
                   <td>
                     <input
@@ -338,12 +309,6 @@ export function ProductMaterials() {
                   <td className="text-slate-500">{m.category || '-'}</td>
                   <td><span className="badge-gray">{m.condition}</span></td>
                   <td><span className="badge-info">{(m.images || []).length} 张</span></td>
-                  <td className="min-w-[180px]">
-                    <div className="space-y-1 text-xs text-slate-600 dark:text-slate-300">
-                      <div>库存 {shop.stock} · {shop.shipping}</div>
-                      {(shop.pickup || shop.fans) && <div className="text-amber-700 dark:text-amber-300">{[shop.pickup, shop.fans && `粉丝价：${shop.fans}`].filter(Boolean).join(' · ')}</div>}
-                    </div>
-                  </td>
                   <td className="text-sm text-slate-500 whitespace-nowrap">
                     {m.created_at ? new Date(m.created_at).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'}
                   </td>
@@ -360,8 +325,7 @@ export function ProductMaterials() {
                     </div>
                   </td>
                 </tr>
-                )
-              })}
+              ))}
             </tbody>
           </table>
         </div>

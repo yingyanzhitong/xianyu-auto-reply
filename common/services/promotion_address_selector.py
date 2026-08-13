@@ -12,332 +12,6 @@ def _normalize_address_text(value: str) -> str:
     return re.sub(r"\s+", "", str(value or ""))
 
 
-def _is_detached_element_error(error: Exception) -> bool:
-    """判断 Playwright 元素句柄是否因页面重绘而失效。"""
-    message = str(error).lower()
-    return "not attached to the dom" in message or "element is not attached" in message
-
-
-def _is_unavailable_element_error(error: Exception) -> bool:
-    """判断动态候选在点击时已失效、隐藏或不可用。"""
-    message = str(error).lower()
-    return (
-        _is_detached_element_error(error)
-        or "element is not visible" in message
-        or "element is not enabled" in message
-    )
-
-
-async def _click_with_detached_retry(
-    target: Any,
-    refresh_target: Callable[[], Awaitable[Any]],
-    target_name: str,
-) -> None:
-    """点击动态列表元素；页面重绘导致句柄失效时重新定位一次后重试。"""
-    current_target = target
-    for attempt in range(2):
-        try:
-            await current_target.click(timeout=3000)
-            return
-        except Exception as error:
-            if not _is_detached_element_error(error) or attempt == 1:
-                raise
-
-            logger.info(f"ℹ️ {target_name}在点击前已刷新，重新定位后重试")
-            await asyncio.sleep(0.3)
-            current_target = await refresh_target()
-            if current_target is None:
-                raise Exception(f"{target_name}刷新后未找到") from error
-
-
-def _get_promotion_address_match_score(
-    option_text: str,
-    expected_text: str,
-    address: str,
-) -> tuple[int, int] | None:
-    """返佣链路的历史候选匹配策略，保持既有行为不变。"""
-    normalized_option = _normalize_address_text(option_text)
-    if not normalized_option:
-        return None
-
-    normalized_expected = _normalize_address_text(expected_text)
-    normalized_address = _normalize_address_text(address)
-    if not any(
-        target in normalized_option or normalized_option in target
-        for target in (normalized_expected, normalized_address)
-        if target
-    ):
-        return None
-
-    match_level = 4
-    if normalized_expected:
-        if normalized_option == normalized_expected:
-            match_level = 0
-        elif normalized_expected in normalized_option:
-            match_level = 1
-    if match_level == 4 and normalized_address:
-        if normalized_option == normalized_address:
-            match_level = 2
-        elif normalized_address in normalized_option:
-            match_level = 3
-    return (match_level, len(option_text))
-
-
-_ADDRESS_COMPONENT_PATTERN = re.compile(
-    r"[^省市区县旗盟地区]+?(?:特别行政区|自治区|自治州|省|市|区|县|旗|盟|地区)"
-)
-_ADDRESS_COMPONENT_SUFFIX_PATTERN = re.compile(
-    r"(?:特别行政区|自治区|自治州|省|市|区|县|旗|盟|地区)$"
-)
-
-
-def _get_shop_address_match_score(
-    option_text: str,
-    expected_text: str,
-    address: str,
-) -> tuple[int, int, int, int] | None:
-    """鱼小铺候选匹配策略，兼容省市区顺序变化或省份省略。"""
-    normalized_option = _normalize_address_text(option_text)
-    if not normalized_option:
-        return None
-
-    best_score = None
-    for target_index, raw_target in enumerate((expected_text, address)):
-        target = _normalize_address_text(raw_target)
-        if not target:
-            continue
-        if normalized_option == target:
-            score = (0, target_index, len(normalized_option), 0)
-        elif target in normalized_option:
-            score = (1, target_index, len(normalized_option), 0)
-        elif len(normalized_option) >= 4 and normalized_option in target:
-            score = (2, target_index, len(normalized_option), 0)
-        else:
-            components = [
-                _ADDRESS_COMPONENT_SUFFIX_PATTERN.sub("", component)
-                for component in _ADDRESS_COMPONENT_PATTERN.findall(target)
-            ]
-            components = list(dict.fromkeys(component for component in components if len(component) >= 2))
-            matched_count = sum(component in normalized_option for component in components)
-            if matched_count < (2 if len(components) >= 2 else 1):
-                continue
-            score = (3, -matched_count, target_index, len(normalized_option))
-
-        if best_score is None or score < best_score:
-            best_score = score
-
-    return best_score
-
-
-def _matches_selected_address_alias(selected_text: str, candidate_text: str) -> bool:
-    """确认鱼小铺回填的地点名属于刚刚点击的候选项。"""
-    selected = _normalize_address_text(selected_text)
-    candidate_label = _normalize_address_text(candidate_text.splitlines()[0] if candidate_text else "")
-    if len(selected) < 2 or len(candidate_label) < 2:
-        return False
-    return selected == candidate_label or selected in candidate_label or candidate_label in selected
-
-
-def _is_amap_query_echo(option_text: str, address: str) -> bool:
-    """高德首项会回显完整搜索词，该项不是可回填的 POI。"""
-    normalized_option = _normalize_address_text(option_text)
-    normalized_address = _normalize_address_text(address)
-    return bool(normalized_option and normalized_address and normalized_option == normalized_address)
-
-
-def _matches_amap_poi_candidate(
-    candidate_text: str,
-    expected_text: str,
-    address: str,
-    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
-) -> bool:
-    """匹配高德 POI 名称；POI 常只保留地址关键词，未必含完整街道。"""
-    if address_match_score(candidate_text, expected_text, address) is not None:
-        return True
-
-    normalized_address = _normalize_address_text(address)
-    poi_name = re.sub(r"[（(][^）)]*[）)]", "", candidate_text)
-    normalized_poi_name = _normalize_address_text(poi_name)
-    return len(normalized_poi_name) >= 4 and normalized_poi_name in normalized_address
-
-
-async def _click_alternative_amap_options(
-    *,
-    page: Any,
-    option_text: str,
-    expected_text: str,
-    address: str,
-    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
-) -> bool:
-    """高德首项为搜索词回显时，依次尝试后续真实 POI 候选。"""
-    try:
-        candidates = await page.query_selector_all(".amap-sug-result .auto-item")
-    except Exception:
-        return False
-
-    for candidate in candidates:
-        try:
-            if not await candidate.is_visible():
-                continue
-            candidate_text = re.sub(r"\s+", " ", str(await candidate.inner_text() or "")).strip()
-            if not candidate_text or _normalize_address_text(candidate_text) == _normalize_address_text(option_text):
-                continue
-            if not _matches_amap_poi_candidate(
-                candidate_text,
-                expected_text,
-                address,
-                address_match_score,
-            ):
-                continue
-
-            logger.info(f"ℹ️ 高德首项未回填，尝试后续 POI 候选: {candidate_text}")
-            await candidate.click(timeout=3000)
-            await asyncio.sleep(0.8)
-            _, selected_text = await _find_promotion_address_entry(page)
-            if address_match_score(selected_text, expected_text, address) is not None:
-                logger.info("✅ 鱼小铺地址候选已通过后续 POI 回填")
-                return True
-            if _matches_selected_address_alias(selected_text, candidate_text):
-                logger.info("✅ 鱼小铺地址候选已通过后续 POI 回填")
-                return True
-        except Exception as exc:
-            if _is_unavailable_element_error(exc):
-                continue
-            logger.info(f"ℹ️ 后续 POI 候选点击未生效: {exc}")
-
-    return False
-
-
-async def _click_shop_address_option(
-    *,
-    page: Any,
-    option: Any,
-    option_text: str,
-    expected_text: str,
-    address: str,
-    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
-    refresh_option: Callable[[], Awaitable[Any]] | None = None,
-) -> None:
-    """依次点击鱼小铺候选及其可点击父容器，直到地点实际回填。"""
-    if _is_amap_query_echo(option_text, address) and await _click_alternative_amap_options(
-        page=page,
-        option_text=option_text,
-        expected_text=expected_text,
-        address=address,
-        address_match_score=address_match_score,
-    ):
-        return
-
-    targets = [option]
-    current = option
-    for _ in range(6):
-        try:
-            parent = await current.query_selector("xpath=..")
-            if not parent or not await parent.is_visible():
-                break
-            box = await parent.bounding_box()
-            if not box or box.get("height", 0) > 320 or box.get("width", 0) > 1400:
-                break
-            targets.append(parent)
-            current = parent
-        except Exception:
-            break
-
-    has_detached_target = False
-    for target in targets:
-        try:
-            if not await target.is_enabled():
-                continue
-        except Exception:
-            pass
-
-        try:
-            await target.click()
-        except Exception as exc:
-            if _is_detached_element_error(exc):
-                has_detached_target = True
-                continue
-            if _is_unavailable_element_error(exc):
-                continue
-            raise
-
-        await asyncio.sleep(0.8)
-        _, selected_text = await _find_promotion_address_entry(page)
-        if address_match_score(selected_text, expected_text, address) is not None:
-            return
-        if _matches_selected_address_alias(selected_text, option_text):
-            logger.info("✅ 鱼小铺地址候选已通过可点击容器回填")
-            return
-
-        if target is option and await _click_alternative_amap_options(
-            page=page,
-            option_text=option_text,
-            expected_text=expected_text,
-            address=address,
-            address_match_score=address_match_score,
-        ):
-            return
-
-        try:
-            await target.click(force=True)
-        except Exception as exc:
-            if _is_detached_element_error(exc):
-                has_detached_target = True
-                continue
-            if _is_unavailable_element_error(exc):
-                continue
-            raise
-
-        await asyncio.sleep(0.8)
-        _, selected_text = await _find_promotion_address_entry(page)
-        if address_match_score(selected_text, expected_text, address) is not None:
-            return
-        if _matches_selected_address_alias(selected_text, option_text):
-            logger.info("✅ 鱼小铺地址候选已通过强制点击容器回填")
-            return
-
-        mouse = getattr(page, "mouse", None)
-        box = await target.bounding_box()
-        if mouse and box:
-            try:
-                await mouse.click(
-                    box["x"] + box["width"] / 2,
-                    box["y"] + box["height"] / 2,
-                )
-            except Exception as exc:
-                if _is_unavailable_element_error(exc):
-                    continue
-                raise
-
-            await asyncio.sleep(0.8)
-            _, selected_text = await _find_promotion_address_entry(page)
-            if address_match_score(selected_text, expected_text, address) is not None:
-                logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
-                return
-            if _matches_selected_address_alias(selected_text, option_text):
-                logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
-                return
-
-    if has_detached_target and refresh_option:
-        refreshed_option = await refresh_option()
-        if refreshed_option is not None and refreshed_option is not option:
-            logger.info("ℹ️ 鱼小铺地址候选在点击时已刷新，重新定位可用容器")
-            return await _click_shop_address_option(
-                page=page,
-                option=refreshed_option,
-                option_text=option_text,
-                expected_text=expected_text,
-                address=address,
-                address_match_score=address_match_score,
-            )
-
-    _, selected_text = await _find_promotion_address_entry(page)
-    raise Exception(
-        "宝贝所在地候选点击未生效，"
-        f"目标候选: {option_text or '空'}，当前显示: {selected_text or '空'}"
-    )
-
-
 async def _read_promotion_address_text(container) -> str:
     candidate_selectors = [
         'div[title]',
@@ -418,87 +92,10 @@ async def _find_promotion_address_entry(page):
     return None, ""
 
 
-async def _find_best_promotion_address_option(
-    roots: list[tuple[str, Any]],
-    input_box: dict[str, float] | None,
-    expected_text: str,
-    address: str,
-    address_match_score: Callable[[str, str, str], tuple[int, ...] | None],
-) -> tuple[Any | None, str]:
-    """从当前地址搜索结果中返回得分最高的可点击候选。"""
-    option_selectors = [
-        '[class*="item"]',
-        '[class*="option"]',
-        '[role="option"]',
-        'li',
-        'div',
-        'span',
-        'button',
-        'a',
-    ]
-    best_option = None
-    best_text = ""
-    best_score = None
-
-    for root_name, root in roots:
-        for selector in option_selectors:
-            try:
-                options = await root.query_selector_all(selector)
-            except Exception:
-                continue
-
-            for option in options:
-                try:
-                    if not await option.is_visible():
-                        continue
-                    option_text = re.sub(r"\s+", " ", str(await option.inner_text() or "")).strip()
-                    normalized_option_text = _normalize_address_text(option_text)
-                    if not normalized_option_text:
-                        continue
-                    if any(text in option_text for text in ["宝贝所在地", "搜索", "清空", "常用地址", "附近地址", "选择精准地址", "帮你推给更多同城买家"]):
-                        continue
-                    if len(normalized_option_text) < 2 or len(normalized_option_text) > 80:
-                        continue
-                    match_score = address_match_score(option_text, expected_text, address)
-                    if match_score is None:
-                        continue
-                    box = await option.bounding_box()
-                    if not box or box.get("height", 0) < 18 or box.get("width", 0) < 40:
-                        continue
-                    if input_box:
-                        if box.get("y", 0) + box.get("height", 0) <= input_box.get("y", 0):
-                            continue
-                        if box.get("y", 0) - input_box.get("y", 0) > 700:
-                            continue
-                        if box.get("x", 0) + box.get("width", 0) < input_box.get("x", 0) - 120:
-                            continue
-                        if box.get("x", 0) > input_box.get("x", 0) + input_box.get("width", 0) + 360:
-                            continue
-
-                    score = (
-                        *match_score,
-                        box.get("y", 0),
-                        box.get("x", 0),
-                        0 if root_name == "地址选择层" else 1,
-                    )
-                    if best_score is None or score < best_score:
-                        best_option = option
-                        best_text = option_text
-                        best_score = score
-                except Exception:
-                    continue
-
-    return best_option, best_text
-
-
 async def set_promotion_item_address(
     publisher: Any,
     item_data: dict,
     fallback_set_item_address: Callable[[dict], Awaitable[None]],
-    address_match_score: Callable[[str, str, str], tuple[int, ...] | None] = _get_promotion_address_match_score,
-    retry_detached_option_click: bool = False,
-    allow_selected_address_alias: bool = False,
-    retry_unapplied_option_click: bool = False,
 ) -> None:
     page = publisher.page
     if not page:
@@ -514,6 +111,12 @@ async def set_promotion_item_address(
     else:
         logger.info(f"\n[步骤13] 📍 设置宝贝所在地，搜索关键词: {address}")
 
+    target_texts: list[str] = []
+    for value in [expected_text, address]:
+        normalized_value = _normalize_address_text(value)
+        if normalized_value and normalized_value not in target_texts:
+            target_texts.append(normalized_value)
+
     trigger, current_text = await _find_promotion_address_entry(page)
     if not trigger:
         logger.warning("⚠️ 返佣页面未识别到卖家页地址入口，回退通用地址逻辑继续尝试")
@@ -521,7 +124,8 @@ async def set_promotion_item_address(
 
     if current_text:
         logger.info(f"当前宝贝所在地: {current_text}")
-        if address_match_score(current_text, expected_text, address) is not None:
+        normalized_current_text = _normalize_address_text(current_text)
+        if any(target in normalized_current_text or normalized_current_text in target for target in target_texts):
             logger.info("✅ 当前宝贝所在地已符合要求，跳过设置")
             return
 
@@ -644,7 +248,8 @@ async def set_promotion_item_address(
     if not search_input:
         _, refreshed_text = await _find_promotion_address_entry(page)
         if refreshed_text:
-            if address_match_score(refreshed_text, expected_text, address) is not None:
+            normalized_refreshed_text = _normalize_address_text(refreshed_text)
+            if any(target in normalized_refreshed_text or normalized_refreshed_text in target for target in target_texts):
                 logger.info("✅ 点击地址入口后已自动匹配到目标地址")
                 return
         raise Exception("未找到宝贝所在地搜索框")
@@ -663,48 +268,81 @@ async def set_promotion_item_address(
     await search_input.type(address, delay=150)
     await asyncio.sleep(2.5)
 
-    best_option, best_text = await _find_best_promotion_address_option(
-        roots=roots,
-        input_box=input_box,
-        expected_text=expected_text,
-        address=address,
-        address_match_score=address_match_score,
-    )
+    option_selectors = [
+        '[class*="item"]',
+        '[class*="option"]',
+        '[role="option"]',
+        'li',
+        'div',
+        'span',
+        'button',
+        'a',
+    ]
+    best_option = None
+    best_text = ""
+    best_score = None
+    normalized_expected = _normalize_address_text(expected_text)
+    normalized_address = _normalize_address_text(address)
+
+    for root_name, root in roots:
+        for selector in option_selectors:
+            try:
+                options = await root.query_selector_all(selector)
+            except Exception:
+                continue
+
+            for option in options:
+                try:
+                    if not await option.is_visible():
+                        continue
+                    option_text = re.sub(r"\s+", " ", str(await option.inner_text() or "")).strip()
+                    normalized_option_text = _normalize_address_text(option_text)
+                    if not normalized_option_text:
+                        continue
+                    if any(text in option_text for text in ["宝贝所在地", "搜索", "清空", "常用地址", "附近地址", "选择精准地址", "帮你推给更多同城买家"]):
+                        continue
+                    if len(normalized_option_text) < 2 or len(normalized_option_text) > 80:
+                        continue
+                    if not any(target in normalized_option_text or normalized_option_text in target for target in target_texts):
+                        continue
+                    box = await option.bounding_box()
+                    if not box or box.get("height", 0) < 18 or box.get("width", 0) < 40:
+                        continue
+                    if input_box:
+                        if box.get("y", 0) + box.get("height", 0) <= input_box.get("y", 0):
+                            continue
+                        if box.get("y", 0) - input_box.get("y", 0) > 700:
+                            continue
+                        if box.get("x", 0) + box.get("width", 0) < input_box.get("x", 0) - 120:
+                            continue
+                        if box.get("x", 0) > input_box.get("x", 0) + input_box.get("width", 0) + 360:
+                            continue
+
+                    match_level = 4
+                    if normalized_expected:
+                        if normalized_option_text == normalized_expected:
+                            match_level = 0
+                        elif normalized_expected in normalized_option_text:
+                            match_level = 1
+                    if match_level == 4 and normalized_address:
+                        if normalized_option_text == normalized_address:
+                            match_level = 2
+                        elif normalized_address in normalized_option_text:
+                            match_level = 3
+
+                    score = (match_level, len(option_text), box.get("y", 0), box.get("x", 0), 0 if root_name == "地址选择层" else 1)
+                    if best_score is None or score < best_score:
+                        best_option = option
+                        best_text = option_text
+                        best_score = score
+                except Exception:
+                    continue
 
     if not best_option:
         raise Exception(f"未找到“{address}”对应的宝贝所在地候选")
 
     logger.info(f"🎯 选择返佣宝贝所在地候选: {best_text}")
-
-    async def refresh_best_option():
-        refreshed_option, _ = await _find_best_promotion_address_option(
-            roots=roots,
-            input_box=input_box,
-            expected_text=expected_text,
-            address=address,
-            address_match_score=address_match_score,
-        )
-        return refreshed_option
-
-    if retry_unapplied_option_click:
-        # 鱼小铺候选的文本子节点可能不可用，首次点击也必须从可用容器开始。
-        await _click_shop_address_option(
-            page=page,
-            option=best_option,
-            option_text=best_text,
-            expected_text=expected_text,
-            address=address,
-            address_match_score=address_match_score,
-            refresh_option=refresh_best_option if retry_detached_option_click else None,
-        )
-    elif retry_detached_option_click:
-        await _click_with_detached_retry(
-            target=best_option,
-            refresh_target=refresh_best_option,
-            target_name=f"宝贝所在地候选“{best_text}”",
-        )
-    else:
-        await best_option.click()
+    await best_option.click()
     await asyncio.sleep(1)
 
     confirm_selectors = [
@@ -736,14 +374,9 @@ async def set_promotion_item_address(
     _, selected_text = await _find_promotion_address_entry(page)
     if selected_text:
         logger.info(f"当前已选择宝贝所在地: {selected_text}")
-        if address_match_score(selected_text, expected_text, address) is not None:
+        normalized_selected_text = _normalize_address_text(selected_text)
+        if any(target in normalized_selected_text or normalized_selected_text in target for target in target_texts):
             logger.info("✅ 宝贝所在地设置完成")
             return
-        if allow_selected_address_alias and _matches_selected_address_alias(selected_text, best_text):
-            logger.info("✅ 鱼小铺已选中匹配候选，保留平台展示的地址别名")
-            return
 
-    raise Exception(
-        "宝贝所在地设置后校验失败，"
-        f"目标候选: {best_text or '空'}，当前显示: {selected_text or '空'}"
-    )
+    raise Exception(f"宝贝所在地设置后校验失败，当前显示: {selected_text or '空'}")

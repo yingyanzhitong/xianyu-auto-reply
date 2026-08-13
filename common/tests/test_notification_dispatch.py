@@ -79,36 +79,6 @@ class NotificationDispatchTest(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(bark_send.await_args.args[1], "金鱼小姐21|¥2.00|1|发货成功")
 
-    async def test_delivery_default_keeps_original_layout_and_adds_amount_and_quantity(self):
-        manager = NotificationManager("seller")
-        with patch("common.db.compat.db_manager.get_message_filter_keywords", return_value=[]), patch(
-            "common.db.compat.db_manager.get_account_notifications",
-            return_value=[{"enabled": True, "channel_type": "bark", "channel_config": {"device_key": "a"}}],
-        ), patch(
-            "common.db.compat.db_manager.get_cookie_details",
-            return_value={"remark": "主账号"},
-        ), patch(
-            "common.db.compat.db_manager.get_order_by_id",
-            return_value={"buyer_fish_nick": "金鱼小姐21", "amount": "2", "quantity": 1},
-        ), patch(
-            "app.services.xianyu.notification_manager.send_bark_notification",
-            new=AsyncMock(return_value=True),
-        ) as bark_send:
-            await manager.send_delivery_failure_notification(
-                "等待你发货",
-                "342188141",
-                "1071626525089",
-                "发货成功",
-                "chat-1",
-                order_id="order-1",
-            )
-
-        message = bark_send.await_args.args[1]
-        self.assertIn("买家: 金鱼小姐21 (ID: 342188141)", message)
-        self.assertIn("订单金额: ¥2.00", message)
-        self.assertIn("购买数量: 1", message)
-        self.assertNotIn("订单ID:", message)
-
     async def test_auto_reply_service_uses_chat_template(self):
         service = object.__new__(AutoReplyService)
         service.cookie_id = "seller"

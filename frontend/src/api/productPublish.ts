@@ -13,8 +13,6 @@ const PREFIX = '/api/v1/product-publish'
 
 // ==================== 类型定义 ====================
 
-export type ShopShippingMode = 'free' | 'distance' | 'fixed' | 'no_shipping'
-
 export interface ProductMaterial {
   id: number
   user_id: number
@@ -31,13 +29,6 @@ export interface ProductMaterial {
   brand?: string | null
   condition: string
   remark?: string | null
-  shop_stock?: number | null
-  shop_shipping_mode?: ShopShippingMode | null
-  shop_shipping_fee?: number | null
-  shop_support_pickup?: boolean | null
-  shop_fans_price_all?: number | null
-  shop_fans_price_old?: number | null
-  shop_fans_price_bought?: number | null
   created_at: string
   updated_at: string
 }
@@ -55,13 +46,6 @@ export interface MaterialCreateParams {
   brand?: string
   condition?: string
   remark?: string
-  shop_stock?: number | null
-  shop_shipping_mode?: ShopShippingMode | null
-  shop_shipping_fee?: number | null
-  shop_support_pickup?: boolean | null
-  shop_fans_price_all?: number | null
-  shop_fans_price_old?: number | null
-  shop_fans_price_bought?: number | null
 }
 
 export interface MaterialListResponse {
@@ -156,35 +140,6 @@ export interface PublishBatchResponseData {
 
 export type PublishBatchResponse = ApiResponse<PublishBatchResponseData>
 
-export interface ShopBatchProgressItem {
-  log_id: number
-  account_id: string
-  title?: string | null
-  material_id?: number | null
-  status: 'pending' | 'publishing' | 'success' | 'failed'
-  item_id?: string | null
-  item_url?: string | null
-  warning_message?: string | null
-  error_message?: string | null
-}
-
-export interface ShopBatchStatusResponse {
-  success: boolean
-  message: string
-  data: {
-    batch_id: string
-    total: number
-    success: number
-    failed: number
-    warning_count: number
-    publishing: number
-    pending: number
-    status: 'queued' | 'running' | 'completed' | 'failed'
-    finished: boolean
-    items: ShopBatchProgressItem[]
-  }
-}
-
 // ==================== 素材库接口 ====================
 
 /** 创建素材 */
@@ -253,16 +208,6 @@ export const publishBatch = (params: {
 /** 查询批量发布任务状态 */
 export const getBatchStatus = (batchId: string): Promise<BatchStatusResponse> =>
   get(`${PREFIX}/publish/batch/${batchId}/status`)
-
-/** 鱼小铺批量发布（独立任务编排） */
-export const publishShopBatch = (params: {
-  account_ids: string[]
-  material_ids: number[]
-}): Promise<PublishBatchResponse> => post(`${PREFIX}/publish/shop/batch`, params)
-
-/** 查询鱼小铺批量发布任务状态 */
-export const getShopBatchStatus = (batchId: string): Promise<ShopBatchStatusResponse> =>
-  get(`${PREFIX}/publish/shop/batch/${batchId}/status`)
 
 // ==================== 图片上传 ====================
 

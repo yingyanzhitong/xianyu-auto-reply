@@ -1612,13 +1612,6 @@ class XianyuPublisher:
         else:
             logger.warning("⚠️ 未找到包邮按钮")
 
-    async def _click_publish_target(self, publish_btn, publish_btn_selector: str | None) -> None:
-        """点击已定位的发布按钮，保留通用发布器既有 Locator 点击行为。"""
-        publish_target = self.page.locator(publish_btn_selector).first if publish_btn_selector else None
-        if publish_target is None:
-            raise Exception("未找到可用的发布按钮定位器")
-        await publish_target.click(timeout=5000)
-
     async def _click_publish_button(self, result: dict):
         """点击发布按钮并等待发布结果（按原项目流程）"""
         logger.info("\n[步骤14] 🎯 点击发布按钮...")
@@ -1690,28 +1683,16 @@ class XianyuPublisher:
 
         publish_btn = None
         publish_btn_selector = None
-        last_publish_btn = None
-        last_publish_btn_selector = None
         for selector in publish_selectors:
             try:
-                candidate = await self.page.wait_for_selector(selector, timeout=5000)
-                if candidate:
-                    last_publish_btn = candidate
-                    last_publish_btn_selector = selector
-                    if await candidate.is_visible() and await candidate.is_enabled():
-                        publish_btn = candidate
+                publish_btn = await self.page.wait_for_selector(selector, timeout=5000)
+                if publish_btn:
+                    if await publish_btn.is_visible() and await publish_btn.is_enabled():
                         publish_btn_selector = selector
                         logger.info(f"✅ 找到发布按钮: {selector}")
                         break
             except Exception:
                 continue
-
-        if publish_btn is None and last_publish_btn is not None:
-            publish_btn = last_publish_btn
-            publish_btn_selector = last_publish_btn_selector
-            logger.info(
-                f"ℹ️ 发布按钮暂未可用，交由发布器重新定位: {publish_btn_selector}"
-            )
 
         if publish_btn:
             await self.page.screenshot(full_page=True)
@@ -1719,7 +1700,10 @@ class XianyuPublisher:
             await asyncio.sleep(2)
 
             logger.info("🚀 点击发布按钮...")
-            await self._click_publish_target(publish_btn, publish_btn_selector)
+            publish_target = self.page.locator(publish_btn_selector).first if publish_btn_selector else None
+            if publish_target is None:
+                raise Exception("未找到可用的发布按钮定位器")
+            await publish_target.click(timeout=5000)
 
             logger.info("\n[步骤15] ⏳ 等待发布完成...")
             logger.info("等待5秒，让发布请求处理...")

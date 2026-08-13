@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import re
-from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional
 
 from sqlalchemy import desc, func, select
@@ -20,73 +19,6 @@ from common.models.product_material import ProductMaterial
 # ==================== 素材库服务 ====================
 
 from common.utils.time_utils import safe_isoformat
-
-
-SHOP_MATERIAL_FIELDS = (
-    "shop_stock",
-    "shop_shipping_mode",
-    "shop_shipping_fee",
-    "shop_support_pickup",
-    "shop_fans_price_all",
-    "shop_fans_price_old",
-    "shop_fans_price_bought",
-)
-SHOP_SHIPPING_MODES = {"free", "distance", "fixed", "no_shipping"}
-SHOP_FANS_PRICE_FIELDS = (
-    "shop_fans_price_all",
-    "shop_fans_price_old",
-    "shop_fans_price_bought",
-)
-
-
-def validate_shop_material_config(data: dict) -> dict:
-    """校验并规范化鱼小铺专属素材配置。"""
-    config = {field: data.get(field) for field in SHOP_MATERIAL_FIELDS}
-    mode = config["shop_shipping_mode"]
-    if mode is not None and mode not in SHOP_SHIPPING_MODES:
-        raise ValueError("鱼小铺发货方式不合法")
-
-    stock = config["shop_stock"]
-    if stock is not None:
-        if isinstance(stock, bool):
-            raise ValueError("鱼小铺库存必须是 1 到 9999 的整数")
-        try:
-            normalized_stock = int(stock)
-        except (TypeError, ValueError):
-            raise ValueError("鱼小铺库存必须是 1 到 9999 的整数") from None
-        if normalized_stock != stock or not 1 <= normalized_stock <= 9999:
-            raise ValueError("鱼小铺库存必须是 1 到 9999 的整数")
-        config["shop_stock"] = normalized_stock
-
-    def normalize_price(value: Any, field_label: str, maximum: Decimal | None = None) -> float | None:
-        if value is None:
-            return None
-        try:
-            decimal_value = Decimal(str(value))
-        except (InvalidOperation, ValueError):
-            raise ValueError(f"{field_label}必须是有效金额") from None
-        if not decimal_value.is_finite() or decimal_value <= 0:
-            raise ValueError(f"{field_label}必须大于 0")
-        if decimal_value.as_tuple().exponent < -2:
-            raise ValueError(f"{field_label}最多保留两位小数")
-        if maximum is not None and decimal_value > maximum:
-            raise ValueError(f"{field_label}不能超过 {maximum}")
-        return float(decimal_value)
-
-    config["shop_shipping_fee"] = normalize_price(
-        config["shop_shipping_fee"], "鱼小铺一口价邮费", Decimal("1000")
-    )
-    for field in SHOP_FANS_PRICE_FIELDS:
-        config[field] = normalize_price(config[field], "鱼小铺粉丝价")
-
-    if mode == "fixed" and config["shop_shipping_fee"] is None:
-        raise ValueError("鱼小铺选择一口价时必须填写邮费")
-    if mode != "fixed":
-        config["shop_shipping_fee"] = None
-
-    if config["shop_support_pickup"] is not None:
-        config["shop_support_pickup"] = bool(config["shop_support_pickup"])
-    return config
 
 
 def _comparable_material_titles(title: str) -> List[str]:
@@ -110,7 +42,6 @@ class ProductMaterialService:
 
     async def create(self, user_id: int, data: dict) -> ProductMaterial:
         """创建素材"""
-        shop_config = validate_shop_material_config(data)
         material = ProductMaterial(
             user_id=user_id,
             title=data["title"],
@@ -125,7 +56,6 @@ class ProductMaterialService:
             brand=data.get("brand"),
             condition=data.get("condition", "全新"),
             remark=data.get("remark"),
-            **shop_config,
         )
         self.session.add(material)
         await self.session.commit()
@@ -310,24 +240,11 @@ class ProductMaterialService:
             "images", "delivery_method", "postage", "address", "brand",
             "condition", "remark",
         ]
-        nullable_fields = {"original_price", "category", "address", "brand", "remark"}
         for field in updatable:
-            if field in data:
+            if field in data and data[field] is not None:
                 value = data[field]
-                if value is None and field not in nullable_fields:
-                    continue
                 if field in ("price", "original_price", "postage"):
-                    value = float(value) if value is not None else None
-                setattr(material, field, value)
-
-        if any(field in data for field in SHOP_MATERIAL_FIELDS):
-            shop_config = {
-                field: getattr(material, field)
-                for field in SHOP_MATERIAL_FIELDS
-            }
-            shop_config.update({field: data[field] for field in SHOP_MATERIAL_FIELDS if field in data})
-            shop_config = validate_shop_material_config(shop_config)
-            for field, value in shop_config.items():
+                    value = float(value) if value else (None if field == "original_price" else 0)
                 setattr(material, field, value)
 
         await self.session.commit()
@@ -381,13 +298,6 @@ def _material_to_dict(m: ProductMaterial) -> dict:
         "brand": m.brand,
         "condition": m.condition,
         "remark": m.remark,
-        "shop_stock": m.shop_stock,
-        "shop_shipping_mode": m.shop_shipping_mode,
-        "shop_shipping_fee": float(m.shop_shipping_fee) if m.shop_shipping_fee is not None else None,
-        "shop_support_pickup": m.shop_support_pickup,
-        "shop_fans_price_all": float(m.shop_fans_price_all) if m.shop_fans_price_all is not None else None,
-        "shop_fans_price_old": float(m.shop_fans_price_old) if m.shop_fans_price_old is not None else None,
-        "shop_fans_price_bought": float(m.shop_fans_price_bought) if m.shop_fans_price_bought is not None else None,
         "source_type": m.source_type,
         "source_item_id": m.source_item_id,
         "source_content_hash": m.source_content_hash,

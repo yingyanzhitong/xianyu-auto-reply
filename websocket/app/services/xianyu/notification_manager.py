@@ -225,9 +225,11 @@ class NotificationManager:
             account_desc = f"{self.cookie_id}({remark})" if remark else self.cookie_id
             notification_message = f"🚨 自动发货通知\n\n" \
                                  f"闲鱼账号: {account_desc}\n" \
-                                 f"买家: {buyer_nick} (ID: {send_user_id or '未知'})\n" \
+                                 f"买家昵称: {buyer_nick}\n" \
+                                 f"买家ID: {send_user_id or '未知'}\n" \
                                  f"订单金额: {amount}\n" \
                                  f"购买数量: {quantity}\n" \
+                                 f"订单ID: {order_id or '未知'}\n" \
                                  f"商品ID: {item_id or '未知'}\n" \
                                  f"聊天ID: {chat_id or '未知'}\n" \
                                  f"结果: {error_message}\n" \

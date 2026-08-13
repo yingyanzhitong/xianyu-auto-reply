@@ -485,15 +485,13 @@ class RedeliveryTask:
             if need_api_fetch:
                 logger.info(f"[定时补发货] 订单 {order_no} {', '.join(fetch_reasons)}，尝试从API重新获取...")
                 try:
-                    from common.services.order_service import OrderDetailService, OrderStatusChecker
+                    from common.services.order_service import OrderStatusChecker
                     from decimal import Decimal
                     checker = OrderStatusChecker(cookie_string, account_id=order.account_id if hasattr(order, 'account_id') else None)
                     raw_detail = await checker._fetch_raw_order_detail(order_no)
                     if raw_detail:
                         # 使用完整的解析方法提取金额和规格
-                        parsed = OrderDetailService(
-                            order.account_id, checker.cookies_str
-                        )._parse_order_detail_response(order_no, raw_detail)
+                        parsed = checker._parse_order_detail_response(order_no, raw_detail)
                         if parsed:
                             updated_fields = []
                             # 更新金额

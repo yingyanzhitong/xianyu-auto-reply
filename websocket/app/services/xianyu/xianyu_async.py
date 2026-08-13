@@ -2004,29 +2004,16 @@ class XianyuAsync:
         if not item_id:
             raise ValueError("item_id 不能为空")
 
-        participant_ids = [str(to_user_id), str(self.myid)]
-        try:
-            pair_first_id, pair_second_id = sorted(
-                participant_ids,
-                key=lambda user_id: int(user_id),
-            )
-        except (TypeError, ValueError) as exc:
-            raise ValueError("会话用户ID格式异常") from exc
-
         mid = generate_mid()
         msg = {
             "lwp": "/r/SingleChatConversation/create",
             "headers": {"mid": mid},
             "body": [
                 {
-                    "pairFirst": f"{pair_first_id}@goofish",
-                    "pairSecond": f"{pair_second_id}@goofish",
+                    "pairFirst": f"{to_user_id}@goofish",
+                    "pairSecond": f"{self.myid}@goofish",
                     "bizType": "1",
-                    "extension": {
-                        "itemId": str(item_id),
-                        "orderId": "",
-                        "source": "",
-                    },
+                    "extension": {"itemId": str(item_id)},
                     "ctx": {"appVersion": "1.0", "platform": "web"},
                 }
             ],
@@ -2059,15 +2046,6 @@ class XianyuAsync:
             # 解析响应提取 cid
             chat_id = self._extract_cid_from_create_chat_response(response)
             if not chat_id:
-                # 闲鱼在会话已经存在时并不总是返回已有会话，部分账号只返回
-                # {"code": 400}。此时从最近会话列表按买卖双方和商品恢复 cid，
-                # 避免订单同步补录（没有 chat_id）后永久无法发货。
-                chat_id = await self._find_existing_chat_conversation(
-                    to_user_id=to_user_id,
-                    item_id=item_id,
-                    timeout=min(timeout, 10.0),
-                )
-            if not chat_id:
                 # cid 解析失败时，同时打印请求体与响应体，定位是请求参数问题还是响应结构变化
                 logger.error(
                     f"【{self.cookie_id}】创建会话响应中未找到 cid: "
@@ -2094,62 +2072,6 @@ class XianyuAsync:
             # 其他异常也要清理
             self._pending_mid_futures.pop(mid, None)
             raise
-
-    async def _find_existing_chat_conversation(
-        self,
-        to_user_id: str,
-        item_id: str,
-        timeout: float = 15.0,
-    ) -> Optional[str]:
-        """从最近会话列表中恢复指定买家的会话 ID。"""
-        ws = self.connection_manager.ws
-        if ws is None:
-            return None
-
-        mid = generate_mid()
-        msg = {
-            "lwp": "/r/Conversation/listNewestPagination",
-            "headers": {"mid": mid},
-            "body": [9007199254740991, 20],
-        }
-        loop = asyncio.get_running_loop()
-        future: asyncio.Future = loop.create_future()
-        self._pending_mid_futures[mid] = future
-
-        try:
-            await ws.send(json.dumps(msg))
-            response = await asyncio.wait_for(future, timeout=timeout)
-            chat_id = self._extract_cid_from_conversation_list_response(
-                response,
-                to_user_id=to_user_id,
-                my_user_id=self.myid,
-                item_id=item_id,
-            )
-            if chat_id:
-                logger.info(
-                    f"【{self.cookie_id}】创建会话未返回 cid，已从最近会话恢复: "
-                    f"to_user_id={to_user_id}, item_id={item_id}, chat_id={chat_id}"
-                )
-            else:
-                logger.warning(
-                    f"【{self.cookie_id}】最近会话中未找到目标会话: "
-                    f"to_user_id={to_user_id}, item_id={item_id}"
-                )
-            return chat_id
-        except asyncio.TimeoutError:
-            logger.warning(
-                f"【{self.cookie_id}】查询最近会话超时: "
-                f"to_user_id={to_user_id}, item_id={item_id}"
-            )
-            return None
-        except Exception as e:
-            logger.warning(
-                f"【{self.cookie_id}】查询最近会话失败: "
-                f"to_user_id={to_user_id}, item_id={item_id}, 错误={e}"
-            )
-            return None
-        finally:
-            self._pending_mid_futures.pop(mid, None)
 
     @staticmethod
     def _extract_cid_from_create_chat_response(response: dict) -> Optional[str]:
@@ -2217,68 +2139,6 @@ class XianyuAsync:
             if "@" in cid:
                 cid = cid.split("@", 1)[0]
             return cid or None
-        except Exception:
-            return None
-
-    @staticmethod
-    def _extract_cid_from_conversation_list_response(
-        response: dict,
-        to_user_id: str,
-        my_user_id: str,
-        item_id: str = "",
-    ) -> Optional[str]:
-        """按会话双方匹配最近会话，商品一致时优先返回。"""
-        try:
-            if not isinstance(response, dict):
-                return None
-            body = response.get("body")
-            if not isinstance(body, dict):
-                return None
-            user_convs = body.get("userConvs")
-            if not isinstance(user_convs, list):
-                return None
-
-            expected_users = {str(to_user_id), str(my_user_id)}
-            buyer_match: Optional[str] = None
-            for item in user_convs:
-                if not isinstance(item, dict):
-                    continue
-                user_conv = item.get("singleChatUserConversation", item)
-                if not isinstance(user_conv, dict):
-                    continue
-                conv = user_conv.get("singleChatConversation")
-                if not isinstance(conv, dict):
-                    continue
-
-                pair_first = str(conv.get("pairFirst") or "").split("@", 1)[0]
-                pair_second = str(conv.get("pairSecond") or "").split("@", 1)[0]
-                if {pair_first, pair_second} != expected_users:
-                    continue
-
-                cid = conv.get("cid") or conv.get("id")
-                if not isinstance(cid, str) or not cid:
-                    continue
-                cid = cid.split("@", 1)[0]
-                if not cid:
-                    continue
-
-                extension = conv.get("extension") or {}
-                if isinstance(extension, str):
-                    try:
-                        extension = json.loads(extension)
-                    except (TypeError, ValueError):
-                        extension = {}
-                conversation_item_id = (
-                    str(extension.get("itemId") or "")
-                    if isinstance(extension, dict)
-                    else ""
-                )
-                if item_id and conversation_item_id == str(item_id):
-                    return cid
-                if buyer_match is None:
-                    buyer_match = cid
-
-            return buyer_match
         except Exception:
             return None
 
