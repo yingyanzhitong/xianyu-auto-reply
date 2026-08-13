@@ -1,0 +1,32 @@
+CHANGELOG.md
+  s_368cb812a71a4b::t_acb81aa7cfe881 3-6
+common/tests/test_delivery_chat_recovery.py
+  s_368cb812a71a4b::t_6cec8af66ef35a 55-64
+frontend/package-lock.json
+  s_368cb812a71a4b::t_01a87c62cf8921 3,9
+frontend/package.json
+  s_368cb812a71a4b::t_3d31b375d24abe 4
+package-lock.json
+  s_368cb812a71a4b::t_8ca370beecf6d5 3,9
+package.json
+  s_368cb812a71a4b::t_b48eda96e3f848 3
+websocket/app/services/xianyu/xianyu_async.py
+  s_368cb812a71a4b::t_49a319642bd7ce 2007-2015,2022-2023,2025-2029
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b15b3058b576218d7466e2cc5b1413002102d5af",
+  "prompts": {},
+  "logical_commit_id": "b15b3058b576218d7466e2cc5b1413002102d5af",
+  "sessions": {
+    "s_368cb812a71a4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffc11-7d11-79a2-989e-ff4c2906805a",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
