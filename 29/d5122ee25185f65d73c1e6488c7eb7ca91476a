@@ -1,0 +1,24 @@
+CHANGELOG.md
+  s_39fab52e9aa3b7::t_78dc345805d196 3-7
+frontend/src/pages/orders/Orders.tsx
+  s_39fab52e9aa3b7::t_07639f3ad83e22 369-383
+package.json
+  s_39fab52e9aa3b7::t_68300162283dea 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "29d5122ee25185f65d73c1e6488c7eb7ca91476a",
+  "prompts": {},
+  "logical_commit_id": "29d5122ee25185f65d73c1e6488c7eb7ca91476a",
+  "sessions": {
+    "s_39fab52e9aa3b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff9bb-0dda-7f72-9b99-327920764e8e",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
