@@ -1,0 +1,54 @@
+backend-web/app/api/routes/product_publish.py
+  s_368cb812a71a4b::t_fca4f6f87af8a1 12,19,25,144,242-246,695
+backend-web/app/services/product_publish_service.py
+  s_368cb812a71a4b::t_aadfad9cc0e6ea 244,247
+backend-web/app/services/xianyu_publisher.py
+  s_368cb812a71a4b::t_72ff6cd7ac74f5 1688-1690,1703-1706
+common/services/promotion_address_selector.py
+  s_368cb812a71a4b::t_18ad834c04fdb0 114-119,127-128,251-252,270-319,321-339,345,377-378,382
+common/services/promotion_xianyu_publisher.py
+  s_368cb812a71a4b::t_601a1021414b42 192,197
+common/utils/item_info_manager.py
+  s_368cb812a71a4b::t_856dd8fbeba41f 154
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_368cb812a71a4b::t_4030cc34798c15 167,173,178-179,182,194,415,637
+frontend/src/pages/product-publish/MaterialFormModal.tsx
+  s_368cb812a71a4b::t_bba98dc74151fd 10,92
+frontend/src/pages/product-publish/ProductMaterials.tsx
+  s_368cb812a71a4b::t_1e250a82a3f0bc 275,279,285,328
+frontend/src/pages/product-publish/PublishLogs.tsx
+  s_368cb812a71a4b::t_5e91869fdb538a 254-257,259-260
+scheduler/app/services/scheduler/redelivery_task.py
+  s_368cb812a71a4b::t_b0335794fe2ae0 488,494
+websocket/app/services/xianyu/notification_manager.py
+  s_368cb812a71a4b::t_95e6face7aff66 228-229,232
+websocket/app/services/xianyu/xianyu_async.py
+  s_368cb812a71a4b::t_f7b86f00d47fe7 2013-2014,2016
+CHANGELOG.md
+  s_368cb812a71a4b::t_43d79d0b55250b 3-8
+frontend/package-lock.json
+  s_368cb812a71a4b::t_9869b9cd9a5b93 3,9
+frontend/package.json
+  s_368cb812a71a4b::t_52d36aa213b154 4
+package-lock.json
+  s_368cb812a71a4b::t_c4ddaf9d86ea03 3,9
+package.json
+  s_368cb812a71a4b::t_e3d09459dabd4e 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "cea7779a29a215295754bee6d9723f85e39d6115",
+  "prompts": {},
+  "logical_commit_id": "cea7779a29a215295754bee6d9723f85e39d6115",
+  "sessions": {
+    "s_368cb812a71a4b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffc11-7d11-79a2-989e-ff4c2906805a",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
