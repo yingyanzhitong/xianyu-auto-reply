@@ -1,0 +1,40 @@
+CHANGELOG.md
+  s_e48c91585923c3::t_b5a794d26218ca 3-7
+common/tests/test_notification_dispatch.py
+  s_e48c91585923c3::t_622df3837b4c70 121,131-136,138-162
+common/tests/test_notification_template.py
+  s_e48c91585923c3::t_b08e81b4e6ec1d 70-85
+common/utils/notification_template.py
+  s_e48c91585923c3::t_bfc4ad35981a53 25-27
+frontend/package-lock.json
+  s_e48c91585923c3::t_8532a56c27404c 3,9
+frontend/package.json
+  s_e48c91585923c3::t_34c7010e68a101 4
+frontend/src/pages/notifications/NotificationChannels.tsx
+  s_e48c91585923c3::t_63fd5aba9a4b44 125-127,164-165,167,169-171,173
+package-lock.json
+  s_e48c91585923c3::t_b1b44c6c32b78e 3,9
+package.json
+  s_e48c91585923c3::t_095810369044d6 3
+websocket/app/services/xianyu/auto_reply_service.py
+  s_e48c91585923c3::t_4d6402fc143843 583-596,737,902-904,1039-1041,1052-1054,1078-1079,1081,1083-1087,1096-1098,1946-1953
+websocket/app/services/xianyu/notification_manager.py
+  s_e48c91585923c3::t_24f4d3dff7573c 62-64,130-131,133,137-139,154-156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f8f820b26a5ffa55cf9cf9318bdfcfa5b1d41089",
+  "prompts": {},
+  "logical_commit_id": "f8f820b26a5ffa55cf9cf9318bdfcfa5b1d41089",
+  "sessions": {
+    "s_e48c91585923c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff90d-b7d5-7920-b0a0-1c52d62bb9a3",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
