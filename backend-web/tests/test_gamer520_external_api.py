@@ -491,6 +491,48 @@ class ExternalRequestValidationTests(unittest.TestCase):
 
         asyncio.run(run_test())
 
+    def test_shop_address_clicks_parent_coordinates_when_element_click_does_not_apply(self):
+        async def run_test():
+            mouse = SimpleNamespace(click=AsyncMock())
+            parent = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=True),
+                is_visible=AsyncMock(return_value=True),
+            )
+            parent.bounding_box = AsyncMock(return_value={"x": 120, "y": 320, "width": 280, "height": 48})
+            parent.query_selector = AsyncMock(return_value=None)
+            child = SimpleNamespace(
+                click=AsyncMock(),
+                is_enabled=AsyncMock(return_value=False),
+                is_visible=AsyncMock(return_value=True),
+            )
+            child.bounding_box = AsyncMock(return_value={"x": 160, "y": 332, "width": 180, "height": 24})
+            child.query_selector = AsyncMock(return_value=parent)
+
+            with patch(
+                "common.services.promotion_address_selector._find_promotion_address_entry",
+                new=AsyncMock(side_effect=[
+                    (None, "上海市徐汇区牙病防治所"),
+                    (None, "上海市徐汇区牙病防治所"),
+                    (None, "恒德利大厦"),
+                ]),
+            ), patch(
+                "common.services.promotion_address_selector.asyncio.sleep",
+                new=AsyncMock(),
+            ):
+                await _click_shop_address_option(
+                    page=SimpleNamespace(mouse=mouse),
+                    option=child,
+                    option_text="恒德利大厦\n南村镇恒美大道",
+                    expected_text="",
+                    address="恒德利大厦南村镇恒美大道",
+                    address_match_score=_get_shop_address_match_score,
+                )
+
+            mouse.click.assert_awaited_once_with(260, 344)
+
+        asyncio.run(run_test())
+
     def test_shop_publisher_uses_its_own_address_matcher(self):
         async def run_test():
             publisher = ShopXianyuPublisher()

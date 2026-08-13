@@ -157,7 +157,7 @@ async def _click_shop_address_option(
             if not parent or not await parent.is_visible():
                 break
             box = await parent.bounding_box()
-            if not box or box.get("height", 0) > 180 or box.get("width", 0) > 600:
+            if not box or box.get("height", 0) > 320 or box.get("width", 0) > 1400:
                 break
             targets.append(parent)
             current = parent
@@ -207,6 +207,28 @@ async def _click_shop_address_option(
         if _matches_selected_address_alias(selected_text, option_text):
             logger.info("✅ 鱼小铺地址候选已通过强制点击容器回填")
             return
+
+        mouse = getattr(page, "mouse", None)
+        box = await target.bounding_box()
+        if mouse and box:
+            try:
+                await mouse.click(
+                    box["x"] + box["width"] / 2,
+                    box["y"] + box["height"] / 2,
+                )
+            except Exception as exc:
+                if _is_unavailable_element_error(exc):
+                    continue
+                raise
+
+            await asyncio.sleep(0.8)
+            _, selected_text = await _find_promotion_address_entry(page)
+            if address_match_score(selected_text, expected_text, address) is not None:
+                logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
+                return
+            if _matches_selected_address_alias(selected_text, option_text):
+                logger.info("✅ 鱼小铺地址候选已通过坐标点击容器回填")
+                return
 
     if has_detached_target and refresh_option:
         refreshed_option = await refresh_option()
