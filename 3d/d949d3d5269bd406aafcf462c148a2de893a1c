@@ -1,0 +1,22 @@
+common/services/order_service.py
+  s_41bbd66e897922::t_6d54e7527a416c 1833-1846,1928,1930-1932,1934-1940
+scheduler/app/services/scheduler/redelivery_task.py
+  s_41bbd66e897922::t_a4a0d55f55d19b 488,494-498
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3dd949d3d5269bd406aafcf462c148a2de893a1c",
+  "prompts": {},
+  "logical_commit_id": "3dd949d3d5269bd406aafcf462c148a2de893a1c",
+  "sessions": {
+    "s_41bbd66e897922": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffefe-cb19-7e63-a33a-44815195540e",
+        "model": "unknown"
+      },
+      "human_author": "masongzhi <masongzhi@bigo.sg>"
+    }
+  }
+}
